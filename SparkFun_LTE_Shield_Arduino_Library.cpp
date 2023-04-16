@@ -1,3 +1,6 @@
+#include <WString.h>
+#include "./utils.h"
+
 /*
   Arduino Library for the SparkFun LTE CAT M1/NB-IoT Shield - SARA-R4
 
@@ -69,6 +72,14 @@ const char LTE_SHIELD_CONNECT_SOCKET[] = "+USOCO"; // Connect to server on socke
 const char LTE_SHIELD_WRITE_SOCKET[] = "+USOWR";   // Write data to a socket
 const char LTE_SHIELD_READ_SOCKET[] = "+USORD";    // Read from a socket
 const char LTE_SHIELD_LISTEN_SOCKET[] = "+USOLI";  // Listen for connection on socket
+
+// ### HTTP
+const char LTE_SHIELD_HTTP[] = "+UHTTP";
+const char LTE_SHIELD_SET_JSON[] = "+UDWNFILE";
+const char LTE_SHIELD_READ_FILE[] = "+URDFILE";
+const char LTE_SHIELD_DELETE_JSON[] = "+UDELFILE";
+const char LTE_SHIELD_REQUEST_JSON[] = "+UHTTPC";
+
 // ### SMS
 const char LTE_SHIELD_MESSAGE_FORMAT[] = "+CMGF"; // Set SMS message format
 const char LTE_SHIELD_SEND_TEXT[] = "+CMGS";      // Send SMS message
@@ -142,7 +153,7 @@ boolean LTE_Shield::begin(SoftwareSerial &softSerial, unsigned long baud)
 boolean LTE_Shield::begin(HardwareSerial &hardSerial, unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin)
 {
 
-    Serial.println("begin");
+    // Debug.println("begin");
 
     LTE_Shield_error_t err;
 
@@ -1789,6 +1800,36 @@ LTE_Shield_error_t LTE_Shield::waitForResponse(const char *expectedResponse, uin
     return found ? LTE_SHIELD_ERROR_SUCCESS : LTE_SHIELD_ERROR_UNEXPECTED_RESPONSE;
 }
 
+LTE_Shield_error_t LTE_Shield::waitForResponsePrint(const char *expectedResponse, uint16_t timeout)
+{
+    unsigned long timeIn;
+    boolean found = false;
+    int index = 0;
+
+    timeIn = millis();
+
+    while ((!found) && (timeIn + timeout > millis()))
+    {
+        if (hwAvailable())
+        {
+            char c = readChar();
+            Debug.write(c);
+            if (c == expectedResponse[index])
+            {
+                if (++index == strlen(expectedResponse))
+                {
+                    found = true;
+                }
+            }
+            else
+            {
+                index = 0;
+            }
+        }
+    }
+    return found ? LTE_SHIELD_ERROR_SUCCESS : LTE_SHIELD_ERROR_UNEXPECTED_RESPONSE;
+}
+
 LTE_Shield_error_t LTE_Shield::sendCommandWithResponse(
     const char *command, const char *expectedResponse, char *responseDest,
     unsigned long commandTimeout, boolean at)
@@ -1934,6 +1975,22 @@ size_t LTE_Shield::hwPrint(const char *s)
     return (size_t)0;
 }
 
+size_t LTE_Shield::hwPrintString(const String &s)
+{
+    if (_hardSerial != NULL)
+    {
+        return _hardSerial->print(s);
+    }
+#ifdef LTE_SHIELD_SOFTWARE_SERIAL_ENABLED
+    else if (_softSerial != NULL)
+    {
+        return _softSerial->print(s);
+    }
+#endif
+
+    return (size_t)0;
+}
+
 size_t LTE_Shield::hwWrite(const char c)
 {
     if (_hardSerial != NULL)
@@ -2024,7 +2081,7 @@ int LTE_Shield::hwAvailable(void)
     return -1;
 }
 
-void LTE_Shield::beginSerial(unsigned long baud,uint32_t config, int8_t rxPin, int8_t txPin)
+void LTE_Shield::beginSerial(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin)
 {
     if (_hardSerial != NULL)
     {
@@ -2033,7 +2090,7 @@ void LTE_Shield::beginSerial(unsigned long baud,uint32_t config, int8_t rxPin, i
 #ifdef LTE_SHIELD_SOFTWARE_SERIAL_ENABLED
     else if (_softSerial != NULL)
     {
-        _softSerial->begin(baud, config, rxPin, txPin,);
+        _softSerial->begin(baud, config, rxPin, txPin, );
     }
 #endif
     delay(100);
@@ -2293,4 +2350,139 @@ static boolean parseGPRMCString(char *rmcString, PositionData *pos,
         return true;
     }
     return false;
+}
+
+LTE_Shield_error_t LTE_Shield::setHost(int api, const char *host)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_HTTP) + 40);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=%d,1,\"%s\"", LTE_SHIELD_HTTP, api, host);
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT, AT_COMMAND);
+    //Debug.println(err);
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::setPort(int api, int port)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_HTTP) + 10);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=%d,5", LTE_SHIELD_HTTP, api);
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT, AT_COMMAND);
+    //Debug.println(err);
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::setHeader(int api, const char *header)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_HTTP) + 40);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=%d,9", LTE_SHIELD_HTTP, api);
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT, AT_COMMAND);
+    //Debug.println(err);
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::setJSON(const String &json)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    int json_size = json.length();
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_SET_JSON) + 20);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=\"data.json\",%d", LTE_SHIELD_SET_JSON, json_size);
+
+    err = sendCommandWithResponse(command, ">", NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT, AT_COMMAND);
+
+    hwPrintString(json);
+
+    err = waitForResponse(LTE_SHIELD_RESPONSE_OK, LTE_SHIELD_SOCKET_WRITE_TIMEOUT);
+
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::readJSON(void)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_READ_FILE) + 20);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=\"data.json\"", LTE_SHIELD_READ_FILE);
+
+    sendCommand(command, AT_COMMAND);
+
+    err = waitForResponsePrint(LTE_SHIELD_RESPONSE_OK, LTE_SHIELD_SOCKET_WRITE_TIMEOUT);
+
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::readResponse(void)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_READ_FILE) + 20);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=\"response.txt\"", LTE_SHIELD_READ_FILE);
+
+    sendCommand(command, AT_COMMAND);
+
+    err = waitForResponsePrint(LTE_SHIELD_RESPONSE_OK, LTE_SHIELD_SOCKET_WRITE_TIMEOUT);
+
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::deleteJSON(void)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_DELETE_JSON) + 20);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=\"data.json\"", LTE_SHIELD_DELETE_JSON);
+
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT, AT_COMMAND);
+
+    free(command);
+    return err;
+}
+
+LTE_Shield_error_t LTE_Shield::sendPOSTRequest(int profile, const char *path)
+{
+    char *command;
+    LTE_Shield_error_t err;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_REQUEST_JSON) + 70);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=%d,4,\"%s\",\"response.txt\",\"data.json\",4", LTE_SHIELD_REQUEST_JSON, profile, path);
+
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL, LTE_SHIELD_STANDARD_RESPONSE_TIMEOUT);
+
+    free(command);
+    return err;
 }

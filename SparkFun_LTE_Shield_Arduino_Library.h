@@ -273,6 +273,18 @@ public:
     LTE_Shield_error_t socketListen(int socket, unsigned int port);
     IPAddress lastRemoteIP(void);
 
+    //http
+
+    LTE_Shield_error_t setHost(int api, const char *host);
+    LTE_Shield_error_t setPort(int api, int port);
+    LTE_Shield_error_t setHeader(int api, const char *header);
+    LTE_Shield_error_t setJSON(const String &json);
+    LTE_Shield_error_t sendJSON(int profile);
+    LTE_Shield_error_t readJSON(void);
+    LTE_Shield_error_t readResponse(void);
+    LTE_Shield_error_t deleteJSON(void);
+    LTE_Shield_error_t sendPOSTRequest(int profile, const char *path);
+
     // GPS
     typedef enum
     {
@@ -354,6 +366,7 @@ private:
 
     // Wait for an expected response (don't send a command)
     LTE_Shield_error_t waitForResponse(const char *expectedResponse, uint16_t timeout);
+    LTE_Shield_error_t waitForResponsePrint(const char *expectedResponse, uint16_t timeout);
 
     // Send command with an expected (potentially partial) response, store entire response
     LTE_Shield_error_t sendCommandWithResponse(const char *command, const char *expectedResponse,
@@ -368,6 +381,7 @@ private:
 
     // UART Functions
     size_t hwPrint(const char *s);
+    size_t hwPrintString(const String &s);
     size_t hwWrite(const char c);
     int readAvailable(char *inString);
     char readChar(void);

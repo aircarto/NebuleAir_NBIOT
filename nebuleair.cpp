@@ -227,6 +227,7 @@ CRGB colorLED_value;
 CRGB colorLED_empty = CRGB(0, 0, 0);
 CRGB colorLED_wifi = CRGB(0, 0, 255);
 CRGB colorLED_lora = CRGB(255, 255, 0);
+CRGB colorLED_nbiot = CRGB(0, 255, 0);
 CRGB colorLED_start = CRGB(255, 255, 255);
 CRGB colorLED_red = CRGB(255, 0, 0);
 CRGB colorLED_orange = CRGB(255, 165, 0);
@@ -815,7 +816,7 @@ const String MOBILE_NETWORK_STRINGS[] = {"Default", "SIM_ICCD", "AT&T", "VERIZON
 										 "TELSTRA", "T-Mobile", "CT"};
 
 #define MAX_OPERATORS 5
-#define DEBUG_PASSTHROUGH_ENABLED
+// #define DEBUG_PASSTHROUGH_ENABLED
 
 LTE_Shield lte;
 struct operator_stats ops[MAX_OPERATORS];
@@ -823,6 +824,20 @@ String currentOperator = "";
 int opsAvailable;
 String currentApn = "";
 IPAddress ip(0, 0, 0, 0);
+
+// A VOIR
+
+// bool nbiotchip;
+// bool nbiottest(int lora_dio0)
+// {
+// 	pinMode(lora_dio0, INPUT_PULLUP);
+// 	delay(200);
+// 	if (!digitalRead(lora_dio0))
+// 	{ // low => LoRa chip detected
+// 		return true;
+// 	}
+// 	return false;
+// }
 
 /*****************************************************************
  * BMP/BME280 declaration                                        *
@@ -857,7 +872,8 @@ int last_update_returncode;
 int last_sendData_returncode;
 
 bool wifi_connection_lost;
-bool lora_connection_lost;
+bool lora_connection_lost; //RETESTER poure ajouter lost
+bool nbiot_connection_lost;
 
 /*****************************************************************
  * SDS variables and enums                                      *
@@ -960,7 +976,9 @@ uint32_t ccs811_sum = 0;
 uint16_t ccs811_val_count = 0;
 
 String last_data_string;
-int last_signal_strength;
+int last_signal_strength_wifi;
+int last_signal_strength_nbiot;
+int last_signal_strength_lorawan;
 int last_disconnect_reason;
 
 String esp_chipid;
@@ -2684,7 +2702,9 @@ static void webserver_values()
 	const String unit_LA(F("dB(A)"));
 	float dew_point_temp;
 
-	const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
+	const int signal_quality_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
+	const int signal_quality_nbiot = calcWiFiSignalQuality(last_signal_strength_nbiot);
+	const int signal_quality_lorawan = calcWiFiSignalQuality(last_signal_strength_lorawan);
 	debug_outln_info(F("ws: values ..."));
 	if (!count_sends)
 	{
@@ -2778,8 +2798,20 @@ static void webserver_values()
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
+	if(cfg::has_wifi){
+	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_wifi), "dBm");
 	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
+	}
+
+	if(cfg::has_nbiot){
+	add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_nbiot), "dBm");
+	add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_nbiot), "%");
+	}
+
+	// if(cfg::has_lora){
+	// add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_lorawan), "dBm");
+	// add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_lorawan), "%");
+	// }
 
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += FPSTR(BR_TAG);
@@ -2825,13 +2857,35 @@ static void webserver_status()
 		add_table_row_from_value(page_content, FPSTR(SENSORS_NPM), last_value_NPM_version);
 	}
 	page_content += FPSTR(EMPTY_ROW);
+
+	if(cfg::has_wifi){
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
 	String wifiStatus(WiFi_error_count);
 	wifiStatus += '/';
-	wifiStatus += String(last_signal_strength);
+	wifiStatus += String(last_signal_strength_wifi);
 	wifiStatus += '/';
 	wifiStatus += String(last_disconnect_reason);
 	add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
+	}
+
+	if(cfg::has_nbiot){
+	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+	String NBIotStatus = "";
+	NBIotStatus += String(last_signal_strength_nbiot);
+	add_table_row_from_value(page_content, F("NBIot"), NBIotStatus);
+	}
+
+	// 	if(cfg::has_lora){
+	// page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+	// String wifiStatus(WiFi_error_count);
+	// wifiStatus += '/';
+	// wifiStatus += String(last_signal_strength_lorawan);
+	// wifiStatus += '/';
+	// wifiStatus += String(last_disconnect_reason);
+	// add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
+	// }
+
+	//AJOUTER NBIOT
 
 	if (last_update_returncode != 0)
 	{
@@ -3516,7 +3570,7 @@ static void connectWifi()
 	}
 
 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
-	last_signal_strength = WiFi.RSSI();
+	last_signal_strength_wifi = WiFi.RSSI();
 
 	if (MDNS.begin(cfg::fs_ssid))
 	{
@@ -3594,7 +3648,7 @@ static void connectWifi()
 // 	}
 
 // 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
-// 	last_signal_strength = WiFi.RSSI();
+// 	last_signal_strength_wifi = WiFi.RSSI();
 
 // 	if (MDNS.begin(cfg::fs_ssid))
 // 	{
@@ -3783,6 +3837,86 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 
 		return millis() - start_send;
 	}
+}
+
+static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data, const int pin)
+{
+	unsigned long start_send = millis();
+	const __FlashStringHelper *contentType;
+	int result = 0;
+	int data_size = data.length();
+	//VOIR ENSUITE POUR HTTPS
+	if (lte.deleteJSON() == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("Deleted former JSON");
+	}
+	else
+	{
+		Debug.println("Delete JSON Failed");
+	}
+	if (lte.setJSON(data) == LTE_SHIELD_SUCCESS)
+	{
+		Debug.print("JSON ready to be sent by NBIoT: ");
+		if (lte.readJSON() == LTE_SHIELD_SUCCESS)
+		{
+			Debug.println("JSON has been read!");
+		}
+		else
+		{
+			Debug.println("JSON can't be read!");
+		}
+	}
+	else
+	{
+		Debug.println("JSON setup failed!");
+		nbiot_connection_lost = true;
+	}
+
+	switch (logger)
+	{
+	case LoggerCustom:
+		result = lte.sendPOSTRequest(2, URL_CUSTOM);
+		break;
+	case LoggerCustom2:
+		result = lte.sendPOSTRequest(3, URL_CUSTOM);
+		break;
+	}
+
+	if (result == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("POST request succeeded!");
+	}
+	else
+	{
+		Debug.println("POST request failed!");
+	}
+
+	if (lte.readResponse() == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("Server response read!");
+	}
+	else
+	{
+		Debug.println("Server response not read!");
+	}
+
+	// if (send_success == true)
+	// {
+	// Debug.println("POST succeed!");
+
+	// }else
+	// {
+	// Debug.print("POST failed with code: ");
+	// Debug.println(result);
+	// }
+
+	if (result != 0)
+	{
+		loggerConfigs[logger].errors++;
+		last_sendData_returncode = result;
+	}
+
+	return millis() - start_send;
 }
 
 /*****************************************************************
@@ -4505,6 +4639,45 @@ static unsigned long sendDataToOptionalApis(const String &data)
 	return sum_send_time;
 }
 
+static unsigned long sendDataToOptionalApisNBIoT(const String &data)
+{
+	unsigned long sum_send_time = 0;
+
+	Debug.println(data);
+
+	// if (cfg::send2madavi)
+	// {
+	// 	debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("madavi.de: "));
+	// 	sum_send_time += sendData(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI, cfg::ssl_madavi);
+	// }
+
+	if (cfg::send2custom)
+	{
+		String data_to_send = data;
+		data_to_send.remove(0, 1);
+		String data_4_custom(F("{\"nebuleairid\": \""));
+		data_4_custom += esp_chipid;
+		data_4_custom += "\", ";
+		data_4_custom += data_to_send;
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT: "));
+		sum_send_time += sendDataNBIoT(LoggerCustom, data_4_custom, 0);
+	}
+
+	if (cfg::send2custom2)
+	{
+		String data_to_send = data;
+		data_to_send.remove(0, 1);
+		String data_4_custom(F("{\"nebuleairid\": \""));
+		data_4_custom += esp_chipid;
+		data_4_custom += "\", ";
+		data_4_custom += data_to_send;
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("atmosud api NBIoT: "));
+		sum_send_time += sendDataNBIoT(LoggerCustom2, data_4_custom, 0);
+	}
+
+	return sum_send_time;
+}
+
 /*****************************************************************
  * Helium/TTN LoRaWAN                  *
  *****************************************************************/
@@ -4642,7 +4815,7 @@ void onEvent(ev_t ev)
 	{
 	case EV_SCAN_TIMEOUT:
 		Debug.println(F("EV_SCAN_TIMEOUT"));
-		//lora_connection_lost = true; //lora_connection_lost = true;
+		//lora_connection_lost = true;
 		break;
 	case EV_BEACON_FOUND:
 		Debug.println(F("EV_BEACON_FOUND"));
@@ -4701,11 +4874,11 @@ void onEvent(ev_t ev)
 		||     break;
 		*/
 	case EV_JOIN_FAILED:
-		Debug.println(F("EV_JOIN_FAILED")); //lora_connection_lost = true;
+		Debug.println(F("EV_JOIN_FAILED"));
 		//lora_connection_lost = true;
 		break;
 	case EV_REJOIN_FAILED:
-		Debug.println(F("EV_REJOIN_FAILED")); //lora_connection_lost = true;
+		Debug.println(F("EV_REJOIN_FAILED"));
 		//lora_connection_lost = true;
 		break;
 	case EV_TXCOMPLETE:
@@ -4923,6 +5096,7 @@ bool loratest(int lora_dio0)
 	{ // low => LoRa chip detected
 		return true;
 	}
+	cfg::has_lora = false;
 	return false;
 }
 
@@ -4961,12 +5135,10 @@ void setup()
 
 	init_config();
 
-#if defined(ESP32) and not defined(ARDUINO_HELTEC_WIFI_LORA_32_V2) and not defined(ARDUINO_TTGO_LoRa32_v21new)
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 	lorachip = loratest(D26); // test if the LoRa module is connected when LoRaWAN option checked, otherwise freeze...
 	Debug.print("Lora chip connected:");
 	Debug.println(lorachip);
-#endif
 
 	if (cfg::npm_read)
 	{
@@ -4989,13 +5161,18 @@ void setup()
 		serialNO2.setTimeout((4 * 12 * 1000) / 9600);
 	}
 
+	//test nbiotchip?
+
 	if (cfg::has_nbiot)
 	{
+		//serialNBIOT.setTimeout(5000); //to test ?
+		//IL VA FALLOIR TIMEOUTER ICI
+
 		if (lte.begin(serialNBIOT, 9600, SERIAL_8N1, NBIOT_SERIAL_RX, NBIOT_SERIAL_TX))
 		{
 			Debug.println("LTE Shield connected!");
 			Debug.println("Sparkfun SARA-R4 NBIoT... serialNBIOT 9600 8N1");
-			// nbiot_started = true;
+			nbiot_connection_lost = false;
 		}
 		else
 		{
@@ -5130,6 +5307,132 @@ void setup()
 		// Received signal strength
 		Debug.println("RSSI: " + String(lte.rssi()));
 		Debug.println();
+
+		//Revoir pour HTTPS
+
+		if (cfg::send2dusti)
+		{
+			Debug.println("Set profile API Sensor.Community");
+
+			if (lte.setHost(0, HOST_SENSORCOMMUNITY) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Host 0: ");
+				Debug.println(HOST_SENSORCOMMUNITY);
+			}
+
+			if (lte.setPort(0, PORT_DUSTI) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Port 0: ");
+				Debug.println(PORT_DUSTI);
+			}
+
+			if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 0/0: ");
+				Debug.println("0:Content-Type:application/json");
+			}
+
+			String headerstr0 = "0:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
+
+			if (lte.setHeader(0, headerstr0.c_str()) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 0/1: ");
+				Debug.println(headerstr0);
+			}
+		}
+
+		if (cfg::send2madavi)
+		{
+			Debug.println("Set profile API Madavi");
+
+			if (lte.setHost(1, HOST_MADAVI) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Host 1: ");
+				Debug.println(HOST_MADAVI);
+			}
+
+			if (lte.setPort(1, PORT_MADAVI) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Port 1: ");
+				Debug.println(PORT_MADAVI);
+			}
+
+			if (lte.setHeader(1, "1:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 1/0: ");
+				Debug.println("1:Content-Type:application/json");
+			}
+
+			String headerstr1 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
+
+			if (lte.setHeader(1, headerstr1.c_str()) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 1/1: ");
+				Debug.println(headerstr1);
+			}
+		}
+
+		if (cfg::send2custom)
+		{
+			Debug.println("Set profile API Aircarto");
+
+			if (lte.setHost(2, HOST_CUSTOM) == LTE_SHIELD_SUCCESS)
+			// if (lte.setHost(2, "webhook.site") == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Host 2: ");
+				Debug.println(HOST_CUSTOM);
+			}
+
+			if (lte.setPort(2, PORT_CUSTOM) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Port 2: ");
+				Debug.println(PORT_CUSTOM);
+			}
+
+			if (lte.setHeader(2, "2:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 2/0: ");
+				Debug.println("2:Content-Type:application/json");
+			}
+
+			// String headerstr = "2:X-Sensor:" + String(F(SENSOR_BASENAME))+ esp_chipid;
+
+			// if (lte.setHeader(2, headerstr.c_str()) == LTE_SHIELD_SUCCESS)
+			// {
+			// 	Debug.print("Header 2/1: ");
+			// 	Debug.println(HOST_SENSORCOMMUNITY);
+			// }
+		}
+
+		if (cfg::send2custom2)
+		{
+			Debug.println("Set profile API AtmoSud");
+			if (lte.setHost(3, HOST_CUSTOM2) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Host 3: ");
+				Debug.println(HOST_CUSTOM2);
+			}
+
+			if (lte.setPort(3, PORT_CUSTOM2) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Port 3: ");
+				Debug.println(PORT_CUSTOM2);
+			}
+
+			// if (lte.setHeader(3, "3:Content-Type:application/json ") == LTE_SHIELD_SUCCESS)
+			// {
+			// 	Debug.print("Header 2/0: ");
+			// 	Debug.println(HOST_SENSORCOMMUNITY);
+			// }
+
+			// String headerstr = "3:X-Sensor:" + String(F(SENSOR_BASENAME))+ esp_chipid;
+
+			// if (lte.setHeader(3, headerstr.c_str()) == LTE_SHIELD_SUCCESS)
+			// {
+			// 	Debug.print("Header 2/1: ");
+			// 	Debug.println(HOST_SENSORCOMMUNITY);
+			// }
+		}
 	}
 
 	if (cfg::has_lora && lorachip)
@@ -5180,11 +5483,11 @@ void setup()
 
 	// Prepare the configuration summary for the following messages (the first is 00000000)
 
-	configlorawan[0] = cfg::sds_read; //REVOIR ICIs
+	configlorawan[0] = cfg::sds_read; //REVOIR ICI
 	configlorawan[1] = cfg::npm_read;
 	configlorawan[2] = cfg::bmx280_read;
 	configlorawan[3] = cfg::ccs811_read;
-	configlorawan[4] = cfg::has_led_value;
+	configlorawan[4] = cfg::has_nbiot;
 	configlorawan[5] = cfg::enveano2_read;
 	configlorawan[6] = cfg::rgpd;
 	configlorawan[7] = cfg::has_wifi;
@@ -5346,7 +5649,7 @@ void loop()
 
 		if (cfg::has_wifi && !wifi_connection_lost)
 		{
-			last_signal_strength = WiFi.RSSI();
+			last_signal_strength_wifi = WiFi.RSSI();
 		}
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
@@ -5402,7 +5705,15 @@ void loop()
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
 		add_Value2Json(data, F("interval"), String(cfg::sending_intervall_ms));
-		add_Value2Json(data, F("signal"), String(last_signal_strength));
+		if(cfg::has_wifi){
+		add_Value2Json(data, F("signal"), String(last_signal_strength_wifi));
+		}
+		if(cfg::has_nbiot){
+		add_Value2Json(data, F("signal"), String(last_signal_strength_nbiot));
+		}
+		// if(cfg::has_lora){
+		// add_Value2Json(data, F("signal"), String(last_signal_strength_lorawan));
+		// }
 		add_Value2Json(data, F("rgpd"), String(cfg::rgpd));
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length())
@@ -5584,6 +5895,19 @@ void loop()
 			debug_outln_info(emptyString);
 		}
 
+		if (cfg::has_nbiot && !nbiot_connection_lost)
+		{
+			Debug.println("NBIOT");
+			sum_send_time += sendDataToOptionalApisNBIoT(data);
+
+			sending_time = (3 * sending_time + sum_send_time) / 4;
+
+			if (sum_send_time > 0)
+			{
+				debug_outln_info(F("Time for Sending NBIoT(ms): "), String(sending_time));
+			}
+		}
+
 		// only do a restart after finishing sending (Wifi). Befor Lora to avoid conflicts with the LMIC
 		if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS)
 		{
@@ -5606,9 +5930,11 @@ void loop()
 			//os_run_loop_once here ?
 		}
 
+		//Show the sendings after sending
+
 		if (cfg::has_led_value)
 		{
-			if ((cfg::has_wifi && wifi_connection_lost && !cfg::has_lora) || (cfg::has_lora && lora_connection_lost && !cfg::has_wifi))
+			if ((cfg::has_wifi && wifi_connection_lost && !cfg::has_lora && !cfg::has_nbiot) || (cfg::has_lora && lora_connection_lost && !cfg::has_wifi && !cfg::has_nbiot) || (cfg::has_nbiot && nbiot_connection_lost && !cfg::has_wifi && !cfg::has_lora))
 			{
 				if (LEDS_NB == 1)
 				{
@@ -5811,6 +6137,89 @@ void loop()
 						for (unsigned int i = 0; i < LEDS_NB; ++i)
 						{
 							leds[i] = colorLED_lora;
+							FastLED.show();
+							delay(187);
+						}
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							leds[i] = colorLED_empty;
+							FastLED.show();
+							delay(187);
+						}
+					}
+				}
+			}
+
+			if (cfg::has_nbiot && ((!cfg::has_wifi && !cfg::has_lora) || (cfg::has_wifi && wifi_connection_lost && cfg::has_lora && lora_connection_lost) || (cfg::has_wifi && wifi_connection_lost && !cfg::has_lora) || (!cfg::has_wifi && cfg::has_lora && lora_connection_lost)) && !nbiot_connection_lost)
+			{
+
+				if (LEDS_NB == 1)
+				{
+					for (int i = 0; i < 15; i++)
+					{
+						leds[0] = colorLED_empty;
+						FastLED.show();
+						delay(100);
+						leds[0] = colorLED_nbiot;
+						FastLED.show();
+						delay(100);
+					}
+					leds[0] = colorLED_empty;
+					FastLED.show();
+				}
+				else
+				{
+					if (LEDS_MATRIX)
+					{
+						drawpicture(transmitgreen1);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen2);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen3);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen4);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen5);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen6);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen7);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen8);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen9);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen10);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen11);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen12);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen13);
+						FastLED.show();
+						delay(250);
+						drawpicture(transmitgreen14);
+						FastLED.show();
+						delay(250);
+						drawpicture(empty);
+					}
+					else
+					{
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							leds[i] = colorLED_nbiot;
 							FastLED.show();
 							delay(187);
 						}
