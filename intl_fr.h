@@ -136,6 +136,7 @@ const char INTL_NBIOT_ACTIVATION[] = "Activer la communication NBIoT";
 const char INTL_NBIOT_EXPLANATION[] = "Cocher les deux check boxes et redémarrer pour activer la configuration";
 const char INTL_NBIOT_CONFIGURATION[] = "Activer le mode configuration";
 const char INTL_NBIOT_NUMBER[] = "Saisir le numéro du réseau: ";
+const char INTL_NBIOT_DATA_FORMAT[] PROGMEM = "Format de données";
 
 
 #include "./aircarto-logo-common.h"

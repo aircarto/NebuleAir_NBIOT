@@ -31,6 +31,7 @@ enum ConfigShapeId {
 	Config_has_nbiot,
 	Config_apn,
 	Config_config_nbiot,
+	Config_nbiot_format,
 	Config_appeui,
 	Config_deveui,
 	Config_appkey,
@@ -80,6 +81,7 @@ static constexpr char CFG_KEY_HAS_LORA[] PROGMEM = "has_lora";
 static constexpr char CFG_KEY_HAS_NBIOT[] PROGMEM = "has_nbiot";
 static constexpr char CFG_KEY_APN[] PROGMEM = "apn";
 static constexpr char CFG_KEY_CONFIG_NBIOT[] PROGMEM = "config_nbiot";
+static constexpr char CFG_KEY_NBIOT_FORMAT[] PROGMEM = "nbiot_format";
 static constexpr char CFG_KEY_APPEUI[] PROGMEM = "appeui";
 static constexpr char CFG_KEY_DEVEUI[] PROGMEM = "deveui";
 static constexpr char CFG_KEY_APPKEY[] PROGMEM = "appkey";
@@ -129,6 +131,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_NBIOT, &cfg::has_nbiot },
 	{ Config_Type_String, sizeof(cfg::apn)-1, CFG_KEY_APN, cfg::apn },
 	{ Config_Type_Bool, 0, CFG_KEY_CONFIG_NBIOT, &cfg::config_nbiot },
+	{ Config_Type_UInt, 0, CFG_KEY_NBIOT_FORMAT, &cfg::nbiot_format },
 	{ Config_Type_Hex, sizeof(cfg::appeui)-1, CFG_KEY_APPEUI, cfg::appeui },
 	{ Config_Type_Hex, sizeof(cfg::deveui)-1, CFG_KEY_DEVEUI, cfg::deveui },
 	{ Config_Type_Hex, sizeof(cfg::appkey)-1, CFG_KEY_APPKEY, cfg::appkey },

@@ -86,8 +86,9 @@ namespace cfg
 	char fs_ssid[LEN_FS_SSID] = FS_SSID;
 	char fs_pwd[LEN_CFG_PASSWORD] = FS_PWD;
 
-	// NBIot APN
+	// NBIoT
 	char apn[LEN_APN];
+	unsigned nbiot_format = NBIOT_FORMAT;
 
 	// main config
 	bool has_wifi = HAS_WIFI;
@@ -181,6 +182,8 @@ bool configlorawan[8] = {false, false, false, false, false, false, false, false}
 // configlorawan[6] = cfg::rgpd;
 // configlorawan[7] = cfg::has_wifi;
 
+bool confignbiot[8] = {false, false, false, false, false, false, false, false};
+
 static byte booltobyte(bool array[8])
 {
 
@@ -230,7 +233,7 @@ CRGB colorLED_lora = CRGB(255, 255, 0);
 CRGB colorLED_nbiot = CRGB(0, 255, 0);
 CRGB colorLED_start = CRGB(255, 255, 255);
 CRGB colorLED_red = CRGB(255, 0, 0);
-CRGB colorLED_orange = CRGB(255, 165, 0);
+CRGB colorLED_orange = CRGB(255, 128, 0);
 CRGB colorLED_yellow = CRGB(255, 255, 0);
 CRGB colorLED_green = CRGB(0, 255, 0);
 
@@ -249,6 +252,11 @@ struct RGB displayColor_value
 };
 
 struct RGB displayColor_connect
+{
+	0, 0, 0
+};
+
+struct RGB displayColor_WiFi
 {
 	0, 0, 0
 };
@@ -370,6 +378,77 @@ struct RGB interpolateindice(int valueIndice, bool correction)
 		result.G = 0;
 		result.B = 0;
 	}
+
+	if (correction == true)
+	{
+		result.R = pgm_read_byte(&gamma8[result.R]);
+		result.G = pgm_read_byte(&gamma8[result.G]);
+		result.B = pgm_read_byte(&gamma8[result.B]);
+	}
+
+	rgb565 = ((result.R & 0b11111000) << 8) | ((result.G & 0b11111100) << 3) | (result.B >> 3);
+	//Debug.println(rgb565); // to get list of color if drawGradient is acitvated
+	return result;
+}
+
+struct RGB colorPM(int valueSensor, int step1, int step2, int step3, int step4, int step5, bool correction)
+{
+	struct RGB result;
+	uint16_t rgb565;
+
+	if (valueSensor == 0)
+	{
+		result.R = 80;
+		result.G = 240; //blue
+		result.B = 230;
+	}
+	else if (valueSensor > 0 && valueSensor <= step5)
+	{
+		if (valueSensor <= step1)
+		{
+		result.R = 80;
+		result.G = 240; //blue
+		result.B = 230;
+		}
+		else if (valueSensor > step1 && valueSensor <= step2)
+		{
+		result.R = 80;
+		result.G = 204; //green
+		result.B = 170;
+		}
+		else if (valueSensor > step2 && valueSensor <= step3)
+		{
+		result.R = 237;
+		result.G = 230; //yellow
+		result.B = 97;
+		}
+		else if (valueSensor > step3 && valueSensor <= step4)
+		{
+		result.R = 237;
+		result.G = 94; //orange
+		result.B = 88;
+		}
+		else if (valueSensor > step4 && valueSensor <= step5)
+		{
+		result.R = 136;
+		result.G = 26; //red
+		result.B = 51;
+		}
+	}
+	else if (valueSensor > step5)
+	{
+		result.R = 115;
+		result.G = 40; //violet
+		result.B = 125;
+	}
+	else
+	{
+		result.R = 0;
+		result.G = 0;
+		result.B = 0;
+	}
+
+	//Gamma Correction
 
 	if (correction == true)
 	{
@@ -688,6 +767,84 @@ struct RGB interpolateTemp(float valueSensor, int step1, int step2, bool correct
 	return result;
 }
 
+struct RGB interpolateWiFi(int32_t valueSignal, int step1, int step2)
+{
+
+	byte endColorValueR;
+	byte startColorValueR;
+	byte endColorValueG;
+	byte startColorValueG;
+	byte endColorValueB;
+	byte startColorValueB;
+
+	int valueLimitHigh;
+	int valueLimitLow;
+	struct RGB result;
+	uint16_t rgb565;
+
+	if (valueSignal == 0)
+	{
+
+		result.R = 255;
+		result.G = 0; //red
+		result.B = 0;
+	}
+	else if (valueSignal > 0 && valueSignal < 100)
+	{
+		if (valueSignal <= step1)
+		{
+			valueLimitHigh = step1;
+			valueLimitLow = 0;
+			endColorValueR = 255;
+			startColorValueR = 255; //red to orange
+			endColorValueG = 128;
+			startColorValueG = 0;
+			endColorValueB = 0;
+			startColorValueB = 0;
+		}
+		else if (valueSignal > step1 && valueSignal <= step2)
+		{
+			valueLimitHigh = step2;
+			valueLimitLow = step1;
+			endColorValueR = 255;
+			startColorValueR = 255;
+			endColorValueG = 255; //orange to yellow
+			startColorValueG = 128;
+			endColorValueB = 0;
+			startColorValueB = 0;
+		}
+		else if (valueSignal > step2 )
+		{
+			valueLimitHigh = 100;
+			valueLimitLow = step2;
+			endColorValueR = 0;
+			startColorValueR = 255;
+			endColorValueG = 255; // yellow to green
+			startColorValueG = 255;
+			endColorValueB = 0;
+			startColorValueB = 0;
+		}
+
+		result.R = (byte)(((endColorValueR - startColorValueR) * ((valueSignal - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueR);
+		result.G = (byte)(((endColorValueG - startColorValueG) * ((valueSignal - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueG);
+		result.B = (byte)(((endColorValueB - startColorValueB) * ((valueSignal - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueB);
+	}
+	else if (valueSignal >= 100)
+	{
+		result.R = 0;
+		result.G = 255; //violet
+		result.B = 0;
+	}
+	else
+	{
+		result.R = 0;
+		result.G = 0;
+		result.B = 0;
+	}
+
+	return result;
+}
+
 static void drawpicture(uint8_t img[][3])
 {
 	for (unsigned int i = 0; i < LEDS_NB; ++i)
@@ -825,6 +982,9 @@ int opsAvailable;
 String currentApn = "";
 IPAddress ip(0, 0, 0, 0);
 
+uint8_t datanbiot[27] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
+						//conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+
 // A VOIR
 
 // bool nbiotchip;
@@ -838,6 +998,7 @@ IPAddress ip(0, 0, 0, 0);
 // 	}
 // 	return false;
 // }
+
 
 /*****************************************************************
  * BMP/BME280 declaration                                        *
@@ -945,6 +1106,8 @@ String current_th_npm;
 float last_value_BMX280_T = -128.0;
 float last_value_BMX280_P = -1.0;
 float last_value_BME280_H = -1.0;
+
+float last_value_no2 = -1.0;
 
 uint32_t sds_pm10_sum = 0;
 uint32_t sds_pm25_sum = 0;
@@ -1702,6 +1865,8 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 	memcpy_P(&c, &configShape[cfgid], sizeof(ConfigShapeEntry));
 	t_value = String(*c.cfg_val.as_uint);
 
+	if(cfgid == Config_value_displayed){
+
 	s = F("<b>{i}</b>"
 		  "<div>"
 		  "<input form='main' type='radio' id='pm1' name='{n}' value='0' {a}>"
@@ -1799,6 +1964,32 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 		break;
 	}
 
+}
+
+if(cfgid == Config_nbiot_format)
+{
+	s = F("<b>{i}</b>"
+		  "<div>"
+		  "<input form='main' type='radio' id='json' name='{n}' value='0' {a}>"
+		  "<label for='json'>json</label>"
+		  "</div>"
+		  "<div>"
+		  "<input form='main' type='radio' id='byte' name='{n}' value='1' {b}>"
+		  "<label for='byte'>byte</label>"
+		  "</div>");
+
+	switch (t_value.toInt())
+	{
+	case 0:
+		s.replace("{a}", "checked");
+		s.replace("{b}", "");
+		break;
+	case 1:
+		s.replace("{a}", "");
+		s.replace("{b}", "checked");
+		break;
+	}
+}
 	s.replace("{i}", info);
 	s.replace("{n}", String(c.cfg_key()));
 	page_content += s;
@@ -2069,9 +2260,6 @@ static void webserver_config_send_body_get(String &page_content)
 	{
 		if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
 		{
-			// page_content += FPSTR(INTL_LTE_NETWORK_FOUND);
-			// page_content += currentOperator;
-			// page_content += FPSTR("<br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
 			add_form_input_nbiot(page_content, FPSTR(INTL_LTE_NETWORK_FOUND), currentOperator, LEN_LTE - 1);
@@ -2079,8 +2267,6 @@ static void webserver_config_send_body_get(String &page_content)
 		}
 		else
 		{
-			// page_content += FPSTR(INTL_LTE_NETWORK_NOT_FOUND);
-			// page_content += FPSTR("<br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
 			add_form_input_nbiot(page_content, FPSTR(INTL_LTE_NETWORK_NOT_FOUND), FPSTR(""), LEN_LTE - 1);
@@ -2093,13 +2279,11 @@ static void webserver_config_send_body_get(String &page_content)
 			page_content += F("<input form='secondar' type='number' name='lteid' id='lteid' maxlength='3'/>");
 			page_content += F("<form id='secondar' method='POST' action='/setlte'></form><input form='secondar' type='submit' value='" INTL_SAVE_NBIOT "'/>");
 		}
-
-		//OU GET?
 	}
 	else
 	{
-		page_content += FPSTR(INTL_NBIOT_MUST_ACTIVATE);
-		page_content += FPSTR("<br/>");
+		// page_content += FPSTR(INTL_NBIOT_MUST_ACTIVATE);
+		// page_content += FPSTR("<br/>");
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2110,6 +2294,8 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(INTL_NBIOT_EXPLANATION);
 	page_content += FPSTR(WEB_B_BR_BR);
 	add_form_checkbox(Config_config_nbiot, FPSTR(INTL_NBIOT_CONFIGURATION));
+	page_content += FPSTR("<br/><br/>");
+	add_radio_input(page_content, Config_nbiot_format, FPSTR(INTL_NBIOT_DATA_FORMAT));
 	server.sendContent(page_content);
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
@@ -2800,7 +2986,7 @@ static void webserver_values()
 
 	if(cfg::has_wifi){
 	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_wifi), "dBm");
-	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
+	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_wifi), "%");
 	}
 
 	if(cfg::has_nbiot){
@@ -3839,7 +4025,7 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 	}
 }
 
-static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data, const int pin)
+static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data, const int pin)  //const char *host, const char *url, bool ssl)
 {
 	unsigned long start_send = millis();
 	const __FlashStringHelper *contentType;
@@ -3871,7 +4057,7 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 		Debug.println("JSON setup failed!");
 		nbiot_connection_lost = true;
 	}
-
+	
 	switch (logger)
 	{
 	case LoggerCustom:
@@ -3891,6 +4077,8 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 		Debug.println("POST request failed!");
 	}
 
+	delay(1000); //let the board write answer from server
+
 	if (lte.readResponse() == LTE_SHIELD_SUCCESS)
 	{
 		Debug.println("Server response read!");
@@ -3899,16 +4087,6 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 	{
 		Debug.println("Server response not read!");
 	}
-
-	// if (send_success == true)
-	// {
-	// Debug.println("POST succeed!");
-
-	// }else
-	// {
-	// Debug.print("POST failed with code: ");
-	// Debug.println(result);
-	// }
 
 	if (result != 0)
 	{
@@ -3919,10 +4097,112 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 	return millis() - start_send;
 }
 
+
+static unsigned long sendDataNBIoTBytes(const LoggerEntry logger, const String &data, const int pin)
+{
+
+//PASSER UN BUFFER
+
+	// unsigned long start_send = millis();
+	// const __FlashStringHelper *contentType;
+	// int result = 0;
+	// int data_size = data.length();
+	// //VOIR ENSUITE POUR HTTPS
+	// if (lte.deleteJSON() == LTE_SHIELD_SUCCESS)
+	// {
+	// 	Debug.println("Deleted former JSON");
+	// }
+	// else
+	// {
+	// 	Debug.println("Delete JSON Failed");
+	// }
+	// if (lte.setJSON(data) == LTE_SHIELD_SUCCESS)
+	// {
+	// 	Debug.print("JSON ready to be sent by NBIoT: ");
+	// 	if (lte.readJSON() == LTE_SHIELD_SUCCESS)
+	// 	{
+	// 		Debug.println("JSON has been read!");
+	// 	}
+	// 	else
+	// 	{
+	// 		Debug.println("JSON can't be read!");
+	// 	}
+	// }
+	// else
+	// {
+	// 	Debug.println("JSON setup failed!");
+	// 	nbiot_connection_lost = true;
+	// }
+	
+	// switch (logger)
+	// {
+	// case LoggerCustom:
+	// 	result = lte.sendPOSTRequest(2, URL_CUSTOM);
+	// 	break;
+	// case LoggerCustom2:
+	// 	result = lte.sendPOSTRequest(3, URL_CUSTOM);
+	// 	break;
+	// }
+
+	// if (result == LTE_SHIELD_SUCCESS)
+	// {
+	// 	Debug.println("POST request succeeded!");
+	// }
+	// else
+	// {
+	// 	Debug.println("POST request failed!");
+	// }
+
+	// delay(1000); //let the board write answer from server
+
+	// if (lte.readResponse() == LTE_SHIELD_SUCCESS)
+	// {
+	// 	Debug.println("Server response read!");
+	// }
+	// else
+	// {
+	// 	Debug.println("Server response not read!");
+	// }
+
+	// if (result != 0)
+	// {
+	// 	loggerConfigs[logger].errors++;
+	// 	last_sendData_returncode = result;
+	// }
+
+	// return millis() - start_send;
+}
+
+
+
+
+
+
 /*****************************************************************
  * send single sensor data to sensor.community api                *
  *****************************************************************/
 static unsigned long sendSensorCommunity(const String &data, const int pin, const __FlashStringHelper *sensorname, const char *replace_str)
+{
+	unsigned long sum_send_time = 0;
+
+	if (cfg::send2dusti && data.length())
+	{
+		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
+		data_sensorcommunity = FPSTR(data_first_part);
+
+		debug_outln_info(F("## Sending to sensor.community - "), sensorname);
+		data_sensorcommunity += data;
+		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
+		data_sensorcommunity.replace(replace_str, emptyString);
+		data_sensorcommunity += "]}";
+		Debug.println(data_sensorcommunity);
+		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
+	}
+
+	return sum_send_time;
+}
+
+static unsigned long sendSensorCommunityNBIoT(const String &data, const int pin, const __FlashStringHelper *sensorname, const char *replace_str)
 {
 	unsigned long sum_send_time = 0;
 
@@ -4694,8 +4974,8 @@ void os_getDevKey(u1_t *buf) { memcpy_P(buf, appkey_hex, 16); }
 
 //Initialiser avec les valeurs -1.0,-128.0 = valeurs par défaut qui doivent être filtrées
 
-uint8_t datalora[25] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff};
-//		    			conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |
+uint8_t datalora[27] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
+//		    			conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
 
 //Peut-être changer l'indianess pour temp = inverser
 
@@ -4717,22 +4997,12 @@ const unsigned TX_INTERVAL = (cfg::sending_intervall_ms) / 1000;
 
 static osjob_t sendjob;
 
-#if defined(ARDUINO_ESP32_DEV) and defined(KIT_C)
 const lmic_pinmap lmic_pins = {
 	.nss = D5,
 	.rxtx = LMIC_UNUSED_PIN,
 	.rst = D0,
 	.dio = {D26, D35, D34},
 };
-#endif
-
-#if defined(ARDUINO_ESP32_DEV) and defined(KIT_V1)
-const lmic_pinmap lmic_pins = {
-	.nss = D5,
-	.rxtx = LMIC_UNUSED_PIN,
-	.rst = D0,
-	.dio = {D26, D35, D34}};
-#endif
 
 void ToByteArray()
 {
@@ -4943,7 +5213,7 @@ void onEvent(ev_t ev)
 	}
 }
 
-static void prepareTxFrame()
+static void prepareTxFrameLoRa()
 {
 
 	//Take care of the endianess in the byte array!
@@ -4987,6 +5257,18 @@ static void prepareTxFrame()
 	if (!wifi_connection_lost && cfg::has_wifi)
 	{
 		configlorawan[7] = true;
+		datalora[0] = booltobyte(configlorawan); //wifi OK et lora connecté => priorité wifi
+	}
+
+	if (nbiot_connection_lost && cfg::has_nbiot)
+	{
+		configlorawan[6] = false;
+		datalora[0] = booltobyte(configlorawan); //wifi perdu et lora connecté
+	}
+
+	if (!nbiot_connection_lost && cfg::has_nbiot)
+	{
+		configlorawan[6] = true;
 		datalora[0] = booltobyte(configlorawan); //wifi OK et lora connecté => priorité wifi
 	}
 
@@ -5076,11 +5358,16 @@ static void prepareTxFrame()
 	datalora[22] = u1.temp_byte[1];
 	datalora[23] = u1.temp_byte[0];
 
+	u1.temp_int = (int16_t)round(last_value_no2);
+
+	datalora[24] = u1.temp_byte[1];
+	datalora[25] = u1.temp_byte[0];
+
 	Debug.printf("HEX values:\n");
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < 26; i++)
 	{
 		Debug.printf(" %02x", datalora[i]);
-		if (i == 23) //ou 22?
+		if (i == 25) //ou 22?
 		{
 			Debug.printf("\n");
 		}
@@ -5099,6 +5386,170 @@ bool loratest(int lora_dio0)
 	cfg::has_lora = false;
 	return false;
 }
+
+
+static void prepareTxFrameNBIoT()
+{
+
+	//Take care of the endianess in the byte array!
+
+	// 00 00 00 c3
+	// C3 00 00 00 = -128.0 in Little Endian
+
+	// 00 00 80 bf
+	// bf 80 00 00 = -1.0 in Little Endian
+
+	union int16_2_byte
+	{
+		int16_t temp_int;
+		byte temp_byte[2];
+	} u1;
+
+	// union uint16_2_byte
+	// {
+	// 	uint16_t temp_uint;
+	// 	byte temp_byte[2];
+	// } u2;
+
+	// union float_2_byte
+	// {
+	// 	float temp_float;
+	// 	byte temp_byte[4];
+	// } u3;
+
+	//Take care of the signed/unsigned and endianess
+
+	//Inverser ordre pour les int16_t !
+
+	//datalora[0] is already defined and is 1 byte
+
+	if (wifi_connection_lost && cfg::has_wifi)
+	{
+		confignbiot[7] = false;
+		datanbiot[0] = booltobyte(confignbiot); //wifi perdu et lora connecté
+	}
+
+	if (!wifi_connection_lost && cfg::has_wifi)
+	{
+		confignbiot[7] = true;
+		datanbiot[0] = booltobyte(confignbiot); //wifi OK et lora connecté => priorité wifi
+	}
+
+	if (lora_connection_lost && cfg::has_lora)
+	{
+		confignbiot[6] = false;
+		datanbiot[0] = booltobyte(confignbiot); //wifi perdu et lora connecté
+	}
+
+	if (!lora_connection_lost && cfg::has_lora)
+	{
+		confignbiot[6] = true;
+		datanbiot[0] = booltobyte(confignbiot); //wifi OK et lora connecté => priorité wifi
+	}
+
+	//x10 to get 1 decimal for PM
+
+	if (last_value_SDS_P1 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_SDS_P1 * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_SDS_P1);
+
+	datanbiot[1] = u1.temp_byte[1];
+	datanbiot[2] = u1.temp_byte[0];
+
+	if (last_value_SDS_P2 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_SDS_P2 * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_SDS_P2);
+
+	datanbiot[3] = u1.temp_byte[1];
+	datanbiot[4] = u1.temp_byte[0];
+
+	if (last_value_NPM_P0 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_P0 * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_P0);
+
+	datanbiot[5] = u1.temp_byte[1];
+	datanbiot[6] = u1.temp_byte[0];
+
+	if (last_value_NPM_P1 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_P1 * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_P1);
+
+	datanbiot[7] = u1.temp_byte[1];
+	datanbiot[8] = u1.temp_byte[0];
+
+	if (last_value_NPM_P2 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_P2 * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_P2);
+
+	datanbiot[9] = u1.temp_byte[1];
+	datanbiot[10] = u1.temp_byte[0];
+
+	if (last_value_NPM_N1 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_N1 * 1000);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_N1);
+
+	datanbiot[11] = u1.temp_byte[1];
+	datanbiot[12] = u1.temp_byte[0];
+
+	if (last_value_NPM_N10 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_N10 * 1000);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_N10);
+
+	datanbiot[13] = u1.temp_byte[1];
+	datanbiot[14] = u1.temp_byte[0];
+
+	if (last_value_NPM_N25 != -1.0)
+		u1.temp_int = (int16_t)round(last_value_NPM_N25 * 1000);
+	else
+		u1.temp_int = (int16_t)round(last_value_NPM_N25);
+
+	datanbiot[15] = u1.temp_byte[1];
+	datanbiot[16] = u1.temp_byte[0];
+
+	u1.temp_int = (int16_t)round(last_value_CCS811);
+
+	datanbiot[17] = u1.temp_byte[1];
+	datanbiot[18] = u1.temp_byte[0];
+
+	if (last_value_BMX280_T != -128.0)
+		u1.temp_int = (int16_t)round(last_value_BMX280_T * 10);
+	else
+		u1.temp_int = (int16_t)round(last_value_BMX280_T);
+
+	datanbiot[19] = u1.temp_byte[1];
+	datanbiot[20] = u1.temp_byte[0];
+
+	datanbiot[21] = (int8_t)round(last_value_BME280_H);
+
+	u1.temp_int = (int16_t)round(last_value_BMX280_P);
+
+	datanbiot[22] = u1.temp_byte[1];
+	datanbiot[23] = u1.temp_byte[0];
+
+	u1.temp_int = (int16_t)round(last_value_no2);
+
+	datanbiot[24] = u1.temp_byte[1];
+	datanbiot[25] = u1.temp_byte[0];
+
+	Debug.printf("HEX values:\n");
+	for (int i = 0; i < 26; i++)
+	{
+		Debug.printf(" %02x", datanbiot[i]);
+		if (i == 25) //ou 22?
+		{
+			Debug.printf("\n");
+		}
+	}
+}
+
+
 
 /*****************************************************************
  * Check stack                                                    *
@@ -5389,10 +5840,22 @@ void setup()
 				Debug.println(PORT_CUSTOM);
 			}
 
+			if(cfg::nbiot_format == 0)
+			{
 			if (lte.setHeader(2, "2:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Header 2/0: ");
 				Debug.println("2:Content-Type:application/json");
+			}
+			}
+
+			if(cfg::nbiot_format == 1)
+			{
+			if (lte.setHeader(2, "2:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 2/0: ");
+				Debug.println("2:Content-Type:application/octet-stream");
+			}
 			}
 
 			// String headerstr = "2:X-Sensor:" + String(F(SENSOR_BASENAME))+ esp_chipid;
@@ -5418,21 +5881,22 @@ void setup()
 				Debug.print("Port 3: ");
 				Debug.println(PORT_CUSTOM2);
 			}
-
-			// if (lte.setHeader(3, "3:Content-Type:application/json ") == LTE_SHIELD_SUCCESS)
-			// {
-			// 	Debug.print("Header 2/0: ");
-			// 	Debug.println(HOST_SENSORCOMMUNITY);
-			// }
-
-			// String headerstr = "3:X-Sensor:" + String(F(SENSOR_BASENAME))+ esp_chipid;
-
-			// if (lte.setHeader(3, headerstr.c_str()) == LTE_SHIELD_SUCCESS)
-			// {
-			// 	Debug.print("Header 2/1: ");
-			// 	Debug.println(HOST_SENSORCOMMUNITY);
-			// }
 		}
+
+	confignbiot[0] = cfg::sds_read; //REVOIR ICI
+	confignbiot[1] = cfg::npm_read;
+	confignbiot[2] = cfg::bmx280_read;
+	confignbiot[3] = cfg::ccs811_read;
+	confignbiot[4] = cfg::enveano2_read;
+	confignbiot[5] = cfg::rgpd;
+	confignbiot[6] = cfg::has_lora;
+	confignbiot[7] = cfg::has_wifi;
+	//si connection manquée => false
+
+	Debug.print("Configuration:");
+	Debug.println(booltobyte(confignbiot));
+	datanbiot[0] = booltobyte(confignbiot);
+
 	}
 
 	if (cfg::has_lora && lorachip)
@@ -5487,9 +5951,9 @@ void setup()
 	configlorawan[1] = cfg::npm_read;
 	configlorawan[2] = cfg::bmx280_read;
 	configlorawan[3] = cfg::ccs811_read;
-	configlorawan[4] = cfg::has_nbiot;
-	configlorawan[5] = cfg::enveano2_read;
-	configlorawan[6] = cfg::rgpd;
+	configlorawan[4] = cfg::enveano2_read;
+	configlorawan[5] = cfg::rgpd;
+	configlorawan[6] = cfg::has_nbiot;
 	configlorawan[7] = cfg::has_wifi;
 	//si connection manquée => false
 
@@ -5705,15 +6169,19 @@ void loop()
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
 		add_Value2Json(data, F("interval"), String(cfg::sending_intervall_ms));
+
 		if(cfg::has_wifi){
-		add_Value2Json(data, F("signal"), String(last_signal_strength_wifi));
+		add_Value2Json(data, F("signal_wifi"), String(last_signal_strength_wifi));
 		}
+
 		if(cfg::has_nbiot){
-		add_Value2Json(data, F("signal"), String(last_signal_strength_nbiot));
+		add_Value2Json(data, F("signal_nbiot"), String(last_signal_strength_nbiot));
 		}
+
 		// if(cfg::has_lora){
-		// add_Value2Json(data, F("signal"), String(last_signal_strength_lorawan));
+		// add_Value2Json(data, F("signal_lora"), String(last_signal_strength_lorawan));
 		// }
+
 		add_Value2Json(data, F("rgpd"), String(cfg::rgpd));
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length())
@@ -5730,7 +6198,7 @@ void loop()
 			case 0:
 				if (cfg::npm_read && last_value_NPM_P0 != -1.0)
 				{
-					displayColor_value = interpolatePM(last_value_NPM_P0, 10, 20, 25, 50, 75, gamma_correction);
+					displayColor_value = colorPM(last_value_NPM_P0, 10, 20, 25, 50, 75, gamma_correction);
 				}
 				else
 				{
@@ -5740,11 +6208,11 @@ void loop()
 			case 1:
 				if (cfg::npm_read && last_value_NPM_P1 != -1.0)
 				{
-					displayColor_value = interpolatePM(last_value_NPM_P1, 20, 40, 50, 100, 150, gamma_correction);
+					displayColor_value = colorPM(last_value_NPM_P1, 20, 40, 50, 100, 150, gamma_correction);
 				}
 				else if (cfg::sds_read && last_value_SDS_P1 != -1.0)
 				{
-					displayColor_value = interpolatePM(last_value_SDS_P1, 20, 40, 50, 100, 150, gamma_correction);
+					displayColor_value = colorPM(last_value_SDS_P1, 20, 40, 50, 100, 150, gamma_correction);
 				}
 				else
 				{
@@ -5754,11 +6222,11 @@ void loop()
 			case 2:
 				if (cfg::npm_read && last_value_NPM_P2 != -1.0)
 				{
-					displayColor_value = interpolatePM(last_value_NPM_P2, 10, 20, 25, 50, 75, gamma_correction);
+					displayColor_value = colorPM(last_value_NPM_P2, 10, 20, 25, 50, 75, gamma_correction);
 				}
 				else if (cfg::sds_read && last_value_SDS_P2 != -1.0)
 				{
-					displayColor_value = interpolatePM(last_value_SDS_P2, 10, 20, 25, 50, 75, gamma_correction);
+					displayColor_value = colorPM(last_value_SDS_P2, 10, 20, 25, 50, 75, gamma_correction);
 				}
 				else
 				{
@@ -5898,7 +6366,22 @@ void loop()
 		if (cfg::has_nbiot && !nbiot_connection_lost)
 		{
 			Debug.println("NBIOT");
-			sum_send_time += sendDataToOptionalApisNBIoT(data);
+
+			if(cfg::nbiot_format == 0)
+			{
+				sum_send_time += sendDataToOptionalApisNBIoT(data);
+			}
+
+			if(cfg::nbiot_format == 1)
+			{
+				prepareTxFrameNBIoT();
+				// sum_send_time += sendDataToOptionalApisNBIoT(data);
+
+				//EN HEADER SIGNAL + ID
+
+			}
+
+			
 
 			sending_time = (3 * sending_time + sum_send_time) / 4;
 
@@ -5924,7 +6407,7 @@ void loop()
 
 		if (cfg::has_lora && lorachip)
 		{
-			prepareTxFrame();
+			prepareTxFrameLoRa();
 			do_send(&sendjob);
 
 			//os_run_loop_once here ?
@@ -5986,6 +6469,12 @@ void loop()
 			if (cfg::has_wifi && !wifi_connection_lost)
 			{
 
+				int32_t signal_diplay_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
+
+				displayColor_WiFi = interpolateWiFi(signal_diplay_wifi,33,66);
+
+				colorLED_wifi = CRGB(displayColor_WiFi.R, displayColor_WiFi.G, displayColor_WiFi.B);
+
 				if (LEDS_NB == 1)
 				{
 
@@ -6005,46 +6494,50 @@ void loop()
 				{
 					if (LEDS_MATRIX)
 					{
-						drawpicture(transmitblue1);
+						Rwifi = displayColor_WiFi.R;
+						Gwifi = displayColor_WiFi.G;
+						Bwifi = displayColor_WiFi.B;
+
+						drawpicture(transmitwifi1);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue2);
+						drawpicture(transmitwifi2);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue3);
+						drawpicture(transmitwifi3);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue4);
+						drawpicture(transmitwifi4);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue5);
+						drawpicture(transmitwifi5);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue6);
+						drawpicture(transmitwifi6);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue7);
+						drawpicture(transmitwifi7);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue8);
+						drawpicture(transmitwifi8);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue9);
+						drawpicture(transmitwifi9);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue10);
+						drawpicture(transmitwifi10);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue11);
+						drawpicture(transmitwifi11);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue12);
+						drawpicture(transmitwifi12);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue13);
+						drawpicture(transmitwifi13);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitblue14);
+						drawpicture(transmitwifi14);
 						FastLED.show();
 						delay(250);
 						drawpicture(empty);
@@ -6088,46 +6581,46 @@ void loop()
 				{
 					if (LEDS_MATRIX)
 					{
-						drawpicture(transmityellow1);
+						drawpicture(transmitlora1);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow2);
+						drawpicture(transmitlora2);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow3);
+						drawpicture(transmitlora3);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow4);
+						drawpicture(transmitlora4);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow5);
+						drawpicture(transmitlora5);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow6);
+						drawpicture(transmitlora6);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow7);
+						drawpicture(transmitlora7);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow8);
+						drawpicture(transmitlora8);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow9);
+						drawpicture(transmitlora9);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow10);
+						drawpicture(transmitlora10);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow11);
+						drawpicture(transmitlora11);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow12);
+						drawpicture(transmitlora12);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow13);
+						drawpicture(transmitlora13);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmityellow14);
+						drawpicture(transmitlora14);
 						FastLED.show();
 						delay(250);
 						drawpicture(empty);
@@ -6171,46 +6664,46 @@ void loop()
 				{
 					if (LEDS_MATRIX)
 					{
-						drawpicture(transmitgreen1);
+						drawpicture(transmitnbiot1);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen2);
+						drawpicture(transmitnbiot2);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen3);
+						drawpicture(transmitnbiot3);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen4);
+						drawpicture(transmitnbiot4);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen5);
+						drawpicture(transmitnbiot5);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen6);
+						drawpicture(transmitnbiot6);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen7);
+						drawpicture(transmitnbiot7);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen8);
+						drawpicture(transmitnbiot8);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen9);
+						drawpicture(transmitnbiot9);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen10);
+						drawpicture(transmitnbiot10);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen11);
+						drawpicture(transmitnbiot11);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen12);
+						drawpicture(transmitnbiot12);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen13);
+						drawpicture(transmitnbiot13);
 						FastLED.show();
 						delay(250);
-						drawpicture(transmitgreen14);
+						drawpicture(transmitnbiot14);
 						FastLED.show();
 						delay(250);
 						drawpicture(empty);

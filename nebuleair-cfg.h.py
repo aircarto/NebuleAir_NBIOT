@@ -6,6 +6,7 @@ Bool        has_lora
 Bool        has_nbiot
 String		apn
 Bool        config_nbiot
+UInt        nbiot_format
 Hex		    appeui
 Hex 		deveui
 Hex 		appkey
