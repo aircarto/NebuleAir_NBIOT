@@ -28,6 +28,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 // APN -- Access Point Name. Gateway between GPRS MNO
 // and another computer network. E.g. "hologram
 const char APN[] PROGMEM = "hologram";  // AVOIR POUR CONFIG
+#define NBIOT_FORMAT 0
 
 //LoRaWAN
 
