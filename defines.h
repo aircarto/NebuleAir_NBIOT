@@ -8,6 +8,9 @@
 #define LEN_CFG_STRING2 65
 #define LEN_CFG_PASSWORD2 65
 
+#define LEN_PAYLOAD_LORA 27
+#define LEN_PAYLOAD_NBIOT 27
+
 #define LEN_APPEUI 17
 #define LEN_DEVEUI 17
 #define LEN_APPKEY 33

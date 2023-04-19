@@ -54,8 +54,10 @@ td{vertical-align:top}\
 .wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;}\
 input[type=text]{width:100%}\
 input[type=password]{width:100%}\
-input[type=submit]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;padding:9px!important;width:100%;border-style:none}\
-input[type=submit]:hover{background:#d44}\
+input[type=submit][form=main]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit][form=main]:hover{background:#d44}\
+input[type=submit][form=secondar]{color:#fff;text-align:center;cursor:pointer;border-radius:5px;font-size:medium;background:#777;padding:3px!important;display:inline;border-style:none}\
+input[type=submit][form=secondar]:hover{background:#aaa}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#438DBF;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
 .tab{padding:10px 20px;display:inline-block;color:#333}\

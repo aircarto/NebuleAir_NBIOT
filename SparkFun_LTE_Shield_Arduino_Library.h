@@ -279,11 +279,15 @@ public:
     LTE_Shield_error_t setPort(int api, int port);
     LTE_Shield_error_t setHeader(int api, const char *header);
     LTE_Shield_error_t setJSON(const String &json);
+    LTE_Shield_error_t setBytes(const uint8_t *data, size_t size);
     LTE_Shield_error_t sendJSON(int profile);
     LTE_Shield_error_t readJSON(void);
+    LTE_Shield_error_t readBytes(void);
     LTE_Shield_error_t readResponse(void);
     LTE_Shield_error_t deleteJSON(void);
+    LTE_Shield_error_t deleteBytes(void);
     LTE_Shield_error_t sendPOSTRequest(int profile, const char *path);
+    LTE_Shield_error_t sendPOSTRequestByte(int profile, const char *path);
 
     // GPS
     typedef enum
@@ -367,6 +371,7 @@ private:
     // Wait for an expected response (don't send a command)
     LTE_Shield_error_t waitForResponse(const char *expectedResponse, uint16_t timeout);
     LTE_Shield_error_t waitForResponsePrint(const char *expectedResponse, uint16_t timeout);
+    LTE_Shield_error_t waitForResponsePrintBytes(const char *expectedResponse, uint16_t timeout);
 
     // Send command with an expected (potentially partial) response, store entire response
     LTE_Shield_error_t sendCommandWithResponse(const char *command, const char *expectedResponse,
@@ -383,8 +388,10 @@ private:
     size_t hwPrint(const char *s);
     size_t hwPrintString(const String &s);
     size_t hwWrite(const char c);
+    size_t hwWriteBytes(const uint8_t *b, size_t size);
     int readAvailable(char *inString);
     char readChar(void);
+    uint8_t readByte(void);
     int hwAvailable(void);
     void beginSerial(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin);
     void setTimeout(unsigned long timeout);
@@ -393,6 +400,7 @@ private:
     LTE_Shield_error_t autobaud(unsigned long desiredBaud);
 
     char *lte_calloc_char(size_t num);
+    uint8_t *lte_calloc_byte(size_t num);
 };
 
 #endif //SPARKFUN_LTE_SHIELD_ARDUINO_LIBRARY_H

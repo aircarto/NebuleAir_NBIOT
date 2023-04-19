@@ -406,33 +406,33 @@ struct RGB colorPM(int valueSensor, int step1, int step2, int step3, int step4, 
 	{
 		if (valueSensor <= step1)
 		{
-		result.R = 80;
-		result.G = 240; //blue
-		result.B = 230;
+			result.R = 80;
+			result.G = 240; //blue
+			result.B = 230;
 		}
 		else if (valueSensor > step1 && valueSensor <= step2)
 		{
-		result.R = 80;
-		result.G = 204; //green
-		result.B = 170;
+			result.R = 80;
+			result.G = 204; //green
+			result.B = 170;
 		}
 		else if (valueSensor > step2 && valueSensor <= step3)
 		{
-		result.R = 237;
-		result.G = 230; //yellow
-		result.B = 97;
+			result.R = 237;
+			result.G = 230; //yellow
+			result.B = 97;
 		}
 		else if (valueSensor > step3 && valueSensor <= step4)
 		{
-		result.R = 237;
-		result.G = 94; //orange
-		result.B = 88;
+			result.R = 237;
+			result.G = 94; //orange
+			result.B = 88;
 		}
 		else if (valueSensor > step4 && valueSensor <= step5)
 		{
-		result.R = 136;
-		result.G = 26; //red
-		result.B = 51;
+			result.R = 136;
+			result.G = 26; //red
+			result.B = 51;
 		}
 	}
 	else if (valueSensor > step5)
@@ -813,7 +813,7 @@ struct RGB interpolateWiFi(int32_t valueSignal, int step1, int step2)
 			endColorValueB = 0;
 			startColorValueB = 0;
 		}
-		else if (valueSignal > step2 )
+		else if (valueSignal > step2)
 		{
 			valueLimitHigh = 100;
 			valueLimitLow = step2;
@@ -972,8 +972,7 @@ const mobile_network_operator_t MOBILE_NETWORK_OPERATOR = MNO_SW_DEFAULT;
 const String MOBILE_NETWORK_STRINGS[] = {"Default", "SIM_ICCD", "AT&T", "VERIZON",
 										 "TELSTRA", "T-Mobile", "CT"};
 
-#define MAX_OPERATORS 5
-// #define DEBUG_PASSTHROUGH_ENABLED
+#define MAX_OPERATORS 10
 
 LTE_Shield lte;
 struct operator_stats ops[MAX_OPERATORS];
@@ -982,8 +981,10 @@ int opsAvailable;
 String currentApn = "";
 IPAddress ip(0, 0, 0, 0);
 
-uint8_t datanbiot[27] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
-						//conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+uint8_t datanbiot[LEN_PAYLOAD_NBIOT] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00};
+									  //conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+
+//27 valeur doit être a 0x00!!! zero terminator
 
 // A VOIR
 
@@ -998,7 +999,6 @@ uint8_t datanbiot[27] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0
 // 	}
 // 	return false;
 // }
-
 
 /*****************************************************************
  * BMP/BME280 declaration                                        *
@@ -1865,131 +1865,131 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 	memcpy_P(&c, &configShape[cfgid], sizeof(ConfigShapeEntry));
 	t_value = String(*c.cfg_val.as_uint);
 
-	if(cfgid == Config_value_displayed){
-
-	s = F("<b>{i}</b>"
-		  "<div>"
-		  "<input form='main' type='radio' id='pm1' name='{n}' value='0' {a}>"
-		  "<label for='pm1'>PM1</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='pm10' name='{n}' value='1' {b}>"
-		  "<label for='pm10'>PM10</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='pm25' name='{n}' value='2' {c}>"
-		  "<label for='pm25'>PM2.5</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='temp' name='{n}' value='3' {d}>"
-		  "<label for='temp'>Température</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='humi' name='{n}' value='4' {e}>"
-		  "<label for='humi'>Humidité</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='press' name='{n}' value='5' {f}>"
-		  "<label for='press'>Pression</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='cov' name='{n}' value='6' {g}>"
-		  "<label for='cov'>COV</label>"
-		  "</div>");
-
-	switch (t_value.toInt())
+	if (cfgid == Config_value_displayed)
 	{
-	case 0:
-		s.replace("{a}", "checked");
-		s.replace("{b}", "");
-		s.replace("{c}", "");
-		s.replace("{d}", "");
-		s.replace("{e}", "");
-		s.replace("{f}", "");
-		s.replace("{g}", "");
-		break;
-	case 1:
-		s.replace("{a}", "");
-		s.replace("{b}", "checked");
-		s.replace("{c}", "");
-		s.replace("{d}", "");
-		s.replace("{e}", "");
-		s.replace("{f}", "");
-		s.replace("{g}", "");
-		break;
-	case 2:
-		s.replace("{a}", "");
-		s.replace("{b}", "");
-		s.replace("{c}", "checked");
-		s.replace("{d}", "");
-		s.replace("{e}", "");
-		s.replace("{f}", "");
-		s.replace("{g}", "");
-		break;
-	case 3:
-		s.replace("{a}", "");
-		s.replace("{b}", "");
-		s.replace("{c}", "");
-		s.replace("{d}", "checked");
-		s.replace("{e}", "");
-		s.replace("{f}", "");
-		s.replace("{g}", "");
-		break;
-	case 4:
-		s.replace("{a}", "");
-		s.replace("{b}", "");
-		s.replace("{c}", "");
-		s.replace("{d}", "");
-		s.replace("{e}", "checked");
-		s.replace("{f}", "");
-		s.replace("{g}", "");
-		break;
-	case 5:
-		s.replace("{a}", "");
-		s.replace("{b}", "");
-		s.replace("{c}", "");
-		s.replace("{d}", "");
-		s.replace("{e}", "");
-		s.replace("{f}", "checked");
-		s.replace("{g}", "");
-		break;
-	case 6:
-		s.replace("{a}", "");
-		s.replace("{b}", "");
-		s.replace("{c}", "");
-		s.replace("{d}", "");
-		s.replace("{e}", "");
-		s.replace("{f}", "");
-		s.replace("{g}", "checked");
-		break;
+
+		s = F("<b>{i}</b>"
+			  "<div>"
+			  "<input form='main' type='radio' id='pm1' name='{n}' value='0' {a}>"
+			  "<label for='pm1'>PM1</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='pm10' name='{n}' value='1' {b}>"
+			  "<label for='pm10'>PM10</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='pm25' name='{n}' value='2' {c}>"
+			  "<label for='pm25'>PM2.5</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='temp' name='{n}' value='3' {d}>"
+			  "<label for='temp'>Température</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='humi' name='{n}' value='4' {e}>"
+			  "<label for='humi'>Humidité</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='press' name='{n}' value='5' {f}>"
+			  "<label for='press'>Pression</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='cov' name='{n}' value='6' {g}>"
+			  "<label for='cov'>COV</label>"
+			  "</div>");
+
+		switch (t_value.toInt())
+		{
+		case 0:
+			s.replace("{a}", "checked");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			break;
+		case 1:
+			s.replace("{a}", "");
+			s.replace("{b}", "checked");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			break;
+		case 2:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "checked");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			break;
+		case 3:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "checked");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			break;
+		case 4:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "checked");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			break;
+		case 5:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "checked");
+			s.replace("{g}", "");
+			break;
+		case 6:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "checked");
+			break;
+		}
 	}
 
-}
-
-if(cfgid == Config_nbiot_format)
-{
-	s = F("<b>{i}</b>"
-		  "<div>"
-		  "<input form='main' type='radio' id='json' name='{n}' value='0' {a}>"
-		  "<label for='json'>json</label>"
-		  "</div>"
-		  "<div>"
-		  "<input form='main' type='radio' id='byte' name='{n}' value='1' {b}>"
-		  "<label for='byte'>byte</label>"
-		  "</div>");
-
-	switch (t_value.toInt())
+	if (cfgid == Config_nbiot_format)
 	{
-	case 0:
-		s.replace("{a}", "checked");
-		s.replace("{b}", "");
-		break;
-	case 1:
-		s.replace("{a}", "");
-		s.replace("{b}", "checked");
-		break;
+		s = F("<b>{i}</b>"
+			  "<div>"
+			  "<input form='main' type='radio' id='json' name='{n}' value='0' {a}>"
+			  "<label for='json'>json</label>"
+			  "</div>"
+			  "<div>"
+			  "<input form='main' type='radio' id='byte' name='{n}' value='1' {b}>"
+			  "<label for='byte'>byte</label>"
+			  "</div>");
+
+		switch (t_value.toInt())
+		{
+		case 0:
+			s.replace("{a}", "checked");
+			s.replace("{b}", "");
+			break;
+		case 1:
+			s.replace("{a}", "");
+			s.replace("{b}", "checked");
+			break;
+		}
 	}
-}
 	s.replace("{i}", info);
 	s.replace("{n}", String(c.cfg_key()));
 	page_content += s;
@@ -2278,6 +2278,7 @@ static void webserver_config_send_body_get(String &page_content)
 			page_content += FPSTR(INTL_NBIOT_NUMBER);
 			page_content += F("<input form='secondar' type='number' name='lteid' id='lteid' maxlength='3'/>");
 			page_content += F("<form id='secondar' method='POST' action='/setlte'></form><input form='secondar' type='submit' value='" INTL_SAVE_NBIOT "'/>");
+			page_content += FPSTR("<br/>");
 		}
 	}
 	else
@@ -2291,10 +2292,11 @@ static void webserver_config_send_body_get(String &page_content)
 	}
 
 	page_content += FPSTR("<b>");
+	page_content += FPSTR("<br/>");
 	page_content += FPSTR(INTL_NBIOT_EXPLANATION);
 	page_content += FPSTR(WEB_B_BR_BR);
 	add_form_checkbox(Config_config_nbiot, FPSTR(INTL_NBIOT_CONFIGURATION));
-	page_content += FPSTR("<br/><br/>");
+	page_content += FPSTR("<br/>");
 	add_radio_input(page_content, Config_nbiot_format, FPSTR(INTL_NBIOT_DATA_FORMAT));
 	server.sendContent(page_content);
 
@@ -2984,14 +2986,16 @@ static void webserver_values()
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	if(cfg::has_wifi){
-	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_wifi), "dBm");
-	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_wifi), "%");
+	if (cfg::has_wifi)
+	{
+		add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_wifi), "dBm");
+		add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_wifi), "%");
 	}
 
-	if(cfg::has_nbiot){
-	add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_nbiot), "dBm");
-	add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_nbiot), "%");
+	if (cfg::has_nbiot)
+	{
+		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_nbiot), "dBm");
+		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_nbiot), "%");
 	}
 
 	// if(cfg::has_lora){
@@ -3044,21 +3048,23 @@ static void webserver_status()
 	}
 	page_content += FPSTR(EMPTY_ROW);
 
-	if(cfg::has_wifi){
-	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
-	String wifiStatus(WiFi_error_count);
-	wifiStatus += '/';
-	wifiStatus += String(last_signal_strength_wifi);
-	wifiStatus += '/';
-	wifiStatus += String(last_disconnect_reason);
-	add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
+	if (cfg::has_wifi)
+	{
+		page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+		String wifiStatus(WiFi_error_count);
+		wifiStatus += '/';
+		wifiStatus += String(last_signal_strength_wifi);
+		wifiStatus += '/';
+		wifiStatus += String(last_disconnect_reason);
+		add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
 	}
 
-	if(cfg::has_nbiot){
-	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
-	String NBIotStatus = "";
-	NBIotStatus += String(last_signal_strength_nbiot);
-	add_table_row_from_value(page_content, F("NBIot"), NBIotStatus);
+	if (cfg::has_nbiot)
+	{
+		page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+		String NBIotStatus = "";
+		NBIotStatus += String(last_signal_strength_nbiot);
+		add_table_row_from_value(page_content, F("NBIot"), NBIotStatus);
 	}
 
 	// 	if(cfg::has_lora){
@@ -4025,12 +4031,11 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 	}
 }
 
-static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data, const int pin)  //const char *host, const char *url, bool ssl)
+static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data, const int pin) //const char *host, const char *url, bool ssl)
 {
 	unsigned long start_send = millis();
 	const __FlashStringHelper *contentType;
 	int result = 0;
-	int data_size = data.length();
 	//VOIR ENSUITE POUR HTTPS
 	if (lte.deleteJSON() == LTE_SHIELD_SUCCESS)
 	{
@@ -4038,7 +4043,7 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 	}
 	else
 	{
-		Debug.println("Delete JSON Failed");
+		Debug.println("Delete JSON failed");
 	}
 	if (lte.setJSON(data) == LTE_SHIELD_SUCCESS)
 	{
@@ -4057,7 +4062,7 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 		Debug.println("JSON setup failed!");
 		nbiot_connection_lost = true;
 	}
-	
+
 	switch (logger)
 	{
 	case LoggerCustom:
@@ -4097,86 +4102,75 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 	return millis() - start_send;
 }
 
-
-static unsigned long sendDataNBIoTBytes(const LoggerEntry logger, const String &data, const int pin)
+static unsigned long sendDataNBIoTBytes(const LoggerEntry logger, const uint8_t *data, size_t size)
 {
+	 unsigned long start_send = millis();
+	 int result = 0;
 
-//PASSER UN BUFFER
+	if (lte.deleteBytes() == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("Deleted former bytes");
+	}
+	else
+	{
+		Debug.println("Delete bytes failed");
+	}
+	if (lte.setBytes(data, size) == LTE_SHIELD_SUCCESS)
+	{
+		Debug.print("Bytes ready to be sent by NBIoT: ");
+		if (lte.readBytes() == LTE_SHIELD_SUCCESS)
+		{
+			Debug.println("Bytes has been read!");
+		}
+		else
+		{
+			Debug.println("Bytes can't be read!");
+		}
+	}
+	else
+	{
+		Debug.println("Bytes setup failed!");
+		nbiot_connection_lost = true;
+	}
 
-	// unsigned long start_send = millis();
-	// const __FlashStringHelper *contentType;
-	// int result = 0;
-	// int data_size = data.length();
-	// //VOIR ENSUITE POUR HTTPS
-	// if (lte.deleteJSON() == LTE_SHIELD_SUCCESS)
-	// {
-	// 	Debug.println("Deleted former JSON");
-	// }
-	// else
-	// {
-	// 	Debug.println("Delete JSON Failed");
-	// }
-	// if (lte.setJSON(data) == LTE_SHIELD_SUCCESS)
-	// {
-	// 	Debug.print("JSON ready to be sent by NBIoT: ");
-	// 	if (lte.readJSON() == LTE_SHIELD_SUCCESS)
-	// 	{
-	// 		Debug.println("JSON has been read!");
-	// 	}
-	// 	else
-	// 	{
-	// 		Debug.println("JSON can't be read!");
-	// 	}
-	// }
-	// else
-	// {
-	// 	Debug.println("JSON setup failed!");
-	// 	nbiot_connection_lost = true;
-	// }
-	
-	// switch (logger)
-	// {
-	// case LoggerCustom:
-	// 	result = lte.sendPOSTRequest(2, URL_CUSTOM);
-	// 	break;
-	// case LoggerCustom2:
-	// 	result = lte.sendPOSTRequest(3, URL_CUSTOM);
-	// 	break;
-	// }
+	switch (logger)
+	{
+	case LoggerCustom:
+		result = lte.sendPOSTRequestByte(2, "/0aa98caf-bc65-4d96-8607-c33724c3aaf6");
+		break;
+	case LoggerCustom2:
+		result = lte.sendPOSTRequestByte(3, URL_CUSTOM2);
+		break;
+	}
 
-	// if (result == LTE_SHIELD_SUCCESS)
-	// {
-	// 	Debug.println("POST request succeeded!");
-	// }
-	// else
-	// {
-	// 	Debug.println("POST request failed!");
-	// }
+	if (result == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("POST request succeeded!");
+	}
+	else
+	{
+		Debug.println("POST request failed!");
+	}
 
-	// delay(1000); //let the board write answer from server
+	delay(1000); //let the board write answer from server
 
-	// if (lte.readResponse() == LTE_SHIELD_SUCCESS)
-	// {
-	// 	Debug.println("Server response read!");
-	// }
-	// else
-	// {
-	// 	Debug.println("Server response not read!");
-	// }
+	if (lte.readResponse() == LTE_SHIELD_SUCCESS)
+	{
+		Debug.println("Server response read!");
+	}
+	else
+	{
+		Debug.println("Server response not read!");
+	}
 
-	// if (result != 0)
-	// {
-	// 	loggerConfigs[logger].errors++;
-	// 	last_sendData_returncode = result;
-	// }
+	if (result != 0)
+	{
+		loggerConfigs[logger].errors++;
+		last_sendData_returncode = result;
+	}
 
-	// return millis() - start_send;
+	 return millis() - start_send;
 }
-
-
-
-
-
 
 /*****************************************************************
  * send single sensor data to sensor.community api                *
@@ -4958,6 +4952,39 @@ static unsigned long sendDataToOptionalApisNBIoT(const String &data)
 	return sum_send_time;
 }
 
+
+static unsigned long sendDataToOptionalApisNBIoTBytes(const uint8_t *data, size_t size)
+{
+	unsigned long sum_send_time = 0;
+
+	if (cfg::send2custom)
+	{
+		String headerstr22 = "3:SignalNBIoT:" + String(last_signal_strength_nbiot);
+
+		if (lte.setHeader(2, headerstr22.c_str()) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Header 2/3: ");
+				Debug.println(headerstr22);
+			}	
+
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT: "));
+		sum_send_time += sendDataNBIoTBytes(LoggerCustom, data, size);
+	}
+
+	if (cfg::send2custom2)
+	{
+		//AJOUTER SI BESOIN
+		// debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("atmosud api NBIoT: "));
+		// sum_send_time += sendDataNBIoTBytes(LoggerCustom2, data_4_custom, 0);
+	}
+
+	return sum_send_time;
+}
+
+
+
+
+
 /*****************************************************************
  * Helium/TTN LoRaWAN                  *
  *****************************************************************/
@@ -4974,7 +5001,7 @@ void os_getDevKey(u1_t *buf) { memcpy_P(buf, appkey_hex, 16); }
 
 //Initialiser avec les valeurs -1.0,-128.0 = valeurs par défaut qui doivent être filtrées
 
-uint8_t datalora[27] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
+uint8_t datalora[LEN_PAYLOAD_LORA] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
 //		    			conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
 
 //Peut-être changer l'indianess pour temp = inverser
@@ -5364,10 +5391,10 @@ static void prepareTxFrameLoRa()
 	datalora[25] = u1.temp_byte[0];
 
 	Debug.printf("HEX values:\n");
-	for (int i = 0; i < 26; i++)
+	for (int i = 0; i < LEN_PAYLOAD_LORA - 1; i++)
 	{
 		Debug.printf(" %02x", datalora[i]);
-		if (i == 25) //ou 22?
+		if (i == LEN_PAYLOAD_LORA - 2) //ou 22?
 		{
 			Debug.printf("\n");
 		}
@@ -5386,7 +5413,6 @@ bool loratest(int lora_dio0)
 	cfg::has_lora = false;
 	return false;
 }
-
 
 static void prepareTxFrameNBIoT()
 {
@@ -5539,17 +5565,15 @@ static void prepareTxFrameNBIoT()
 	datanbiot[25] = u1.temp_byte[0];
 
 	Debug.printf("HEX values:\n");
-	for (int i = 0; i < 26; i++)
+	for (int i = 0; i < LEN_PAYLOAD_NBIOT - 1; i++)
 	{
 		Debug.printf(" %02x", datanbiot[i]);
-		if (i == 25) //ou 22?
+		if (i == LEN_PAYLOAD_NBIOT - 2) //ou 22?
 		{
 			Debug.printf("\n");
 		}
 	}
 }
-
-
 
 /*****************************************************************
  * Check stack                                                    *
@@ -5783,12 +5807,12 @@ void setup()
 				Debug.println("0:Content-Type:application/json");
 			}
 
-			String headerstr0 = "0:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
+			String headerstr01 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
 
-			if (lte.setHeader(0, headerstr0.c_str()) == LTE_SHIELD_SUCCESS)
+			if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Header 0/1: ");
-				Debug.println(headerstr0);
+				Debug.println(headerstr01);
 			}
 		}
 
@@ -5808,18 +5832,18 @@ void setup()
 				Debug.println(PORT_MADAVI);
 			}
 
-			if (lte.setHeader(1, "1:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+			if (lte.setHeader(1, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Header 1/0: ");
-				Debug.println("1:Content-Type:application/json");
+				Debug.println("0:Content-Type:application/json");
 			}
 
-			String headerstr1 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
+			String headerstr11 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
 
-			if (lte.setHeader(1, headerstr1.c_str()) == LTE_SHIELD_SUCCESS)
+			if (lte.setHeader(1, headerstr11.c_str()) == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Header 1/1: ");
-				Debug.println(headerstr1);
+				Debug.println(headerstr11);
 			}
 		}
 
@@ -5827,8 +5851,8 @@ void setup()
 		{
 			Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(2, HOST_CUSTOM) == LTE_SHIELD_SUCCESS)
-			// if (lte.setHost(2, "webhook.site") == LTE_SHIELD_SUCCESS)
+			//if (lte.setHost(2, HOST_CUSTOM) == LTE_SHIELD_SUCCESS)
+			if (lte.setHost(2, "webhook.site") == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Host 2: ");
 				Debug.println(HOST_CUSTOM);
@@ -5840,22 +5864,37 @@ void setup()
 				Debug.println(PORT_CUSTOM);
 			}
 
-			if(cfg::nbiot_format == 0)
+			if (cfg::nbiot_format == 0)
 			{
-			if (lte.setHeader(2, "2:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 2/0: ");
-				Debug.println("2:Content-Type:application/json");
-			}
+				if (lte.setHeader(2, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Header 2/0: ");
+					Debug.println("2:Content-Type:application/json");
+				}
 			}
 
-			if(cfg::nbiot_format == 1)
+			if (cfg::nbiot_format == 1)
 			{
-			if (lte.setHeader(2, "2:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 2/0: ");
-				Debug.println("2:Content-Type:application/octet-stream");
-			}
+				if (lte.setHeader(2, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Header 2/0: ");
+					Debug.println("2:Content-Type:application/octet-stream");
+				}
+
+				String headerstr21 = "1:Sensor:nebuleair-" + esp_chipid;
+
+				if (lte.setHeader(2, headerstr21.c_str()) == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Header 2/1: ");
+					Debug.println(headerstr21);
+				}
+
+				if (lte.setHeader(2, "2:Content-Transfer-Encoding:8BIT") == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Header 2/2: ");
+					Debug.println("2:Content-Transfer-Encoding:8BIT");  //BINARY
+				}
+
 			}
 
 			// String headerstr = "2:X-Sensor:" + String(F(SENSOR_BASENAME))+ esp_chipid;
@@ -5883,20 +5922,19 @@ void setup()
 			}
 		}
 
-	confignbiot[0] = cfg::sds_read; //REVOIR ICI
-	confignbiot[1] = cfg::npm_read;
-	confignbiot[2] = cfg::bmx280_read;
-	confignbiot[3] = cfg::ccs811_read;
-	confignbiot[4] = cfg::enveano2_read;
-	confignbiot[5] = cfg::rgpd;
-	confignbiot[6] = cfg::has_lora;
-	confignbiot[7] = cfg::has_wifi;
-	//si connection manquée => false
+		confignbiot[0] = cfg::sds_read; //REVOIR ICI
+		confignbiot[1] = cfg::npm_read;
+		confignbiot[2] = cfg::bmx280_read;
+		confignbiot[3] = cfg::ccs811_read;
+		confignbiot[4] = cfg::enveano2_read;
+		confignbiot[5] = cfg::rgpd;
+		confignbiot[6] = cfg::has_lora;
+		confignbiot[7] = cfg::has_wifi;
+		//si connection manquée => false
 
-	Debug.print("Configuration:");
-	Debug.println(booltobyte(confignbiot));
-	datanbiot[0] = booltobyte(confignbiot);
-
+		Debug.print("Configuration:");
+		Debug.println(booltobyte(confignbiot));
+		datanbiot[0] = booltobyte(confignbiot);
 	}
 
 	if (cfg::has_lora && lorachip)
@@ -6170,12 +6208,14 @@ void loop()
 		add_Value2Json(data, F("max_micro"), String(max_micro));
 		add_Value2Json(data, F("interval"), String(cfg::sending_intervall_ms));
 
-		if(cfg::has_wifi){
-		add_Value2Json(data, F("signal_wifi"), String(last_signal_strength_wifi));
+		if (cfg::has_wifi)
+		{
+			add_Value2Json(data, F("signal_wifi"), String(last_signal_strength_wifi));
 		}
 
-		if(cfg::has_nbiot){
-		add_Value2Json(data, F("signal_nbiot"), String(last_signal_strength_nbiot));
+		if (cfg::has_nbiot)
+		{
+			add_Value2Json(data, F("signal_nbiot"), String(last_signal_strength_nbiot));
 		}
 
 		// if(cfg::has_lora){
@@ -6367,21 +6407,20 @@ void loop()
 		{
 			Debug.println("NBIOT");
 
-			if(cfg::nbiot_format == 0)
+			if (cfg::nbiot_format == 0)
 			{
 				sum_send_time += sendDataToOptionalApisNBIoT(data);
 			}
 
-			if(cfg::nbiot_format == 1)
+			if (cfg::nbiot_format == 1)
 			{
 				prepareTxFrameNBIoT();
 				// sum_send_time += sendDataToOptionalApisNBIoT(data);
 
 				//EN HEADER SIGNAL + ID
-
+				// datanbiot[LEN_PAYLOAD_NBIOT-1] = NULL;
+				sum_send_time += sendDataToOptionalApisNBIoTBytes(datanbiot, LEN_PAYLOAD_NBIOT*(sizeof(uint8_t)));
 			}
-
-			
 
 			sending_time = (3 * sending_time + sum_send_time) / 4;
 
@@ -6471,7 +6510,7 @@ void loop()
 
 				int32_t signal_diplay_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
 
-				displayColor_WiFi = interpolateWiFi(signal_diplay_wifi,33,66);
+				displayColor_WiFi = interpolateWiFi(signal_diplay_wifi, 33, 66);
 
 				colorLED_wifi = CRGB(displayColor_WiFi.R, displayColor_WiFi.G, displayColor_WiFi.B);
 
