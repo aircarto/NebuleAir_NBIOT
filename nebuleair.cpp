@@ -2091,8 +2091,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			  "<label for='cov'>COV</label>"
 			  "</div>"
 			  "<input form='main' type='radio' id='no2' name='{n}' value='7' {h}>"
-			  "<label for='no2'>NO2</label>"
-			  "</div>");
+			  "<label for='no2'>NO2</label>");
 
 		switch (t_value.toInt())
 		{
@@ -2571,7 +2570,7 @@ static void webserver_config_send_body_get(String &page_content)
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = emptyString;
+	//page_content = emptyString;
 
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_NO2_SENSORS);
@@ -2597,7 +2596,6 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(7));
-
 	page_content += FPSTR("<b>");
 	page_content += tmpl(FPSTR(INTL_SEND_TO), F(""));
 	page_content += FPSTR(WEB_B_BR);
@@ -2641,6 +2639,8 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_pwd_custom2, FPSTR(INTL_PASSWORD2), LEN_CFG_PASSWORD2 - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	server.sendContent(page_content);
+	page_content = emptyString;
+
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(8));
 
 	//AJOUTER TEXTE, LIEN etc.
