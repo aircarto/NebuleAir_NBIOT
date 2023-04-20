@@ -36,6 +36,8 @@ extern void add_table_row_from_value(String& page_content, const __FlashStringHe
 extern void add_table_row_from_value(String& page_content, const __FlashStringHelper* param, const String& value, const char* unit = nullptr);
 
 extern int32_t calcWiFiSignalQuality(int32_t rssi);
+extern int32_t calcNBIoTSignalQuality(int32_t rssi);
+extern int32_t calcLoRaWANSignalQuality(int32_t rssi);
 
 extern String add_sensor_type(const String& sensor_text);
 extern String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi);
@@ -55,7 +57,6 @@ namespace cfg {
 
 #define serialSDS (Serial1)
 #define serialNPM (Serial1) 
-// #define serialNBIOT (Serial2) 
 
 enum class PmSensorCmd {
 	Start,

@@ -65,6 +65,31 @@ int32_t calcWiFiSignalQuality(int32_t rssi) {
 	return (rssi + 100) * 2;
 }
 
+int32_t calcNBIoTSignalQuality(int32_t rssi) {
+	// Treat 0 or positive values as 0%
+	if (rssi >= 0 || rssi < -100) {
+		rssi = -100;
+	}
+	if (rssi > -50) {
+		rssi = -50;
+	}
+	return (rssi + 100) * 2;
+}
+
+int32_t calcLoRaWANSignalQuality(int32_t rssi) {
+	// Treat 0 or positive values as 0%
+	if (rssi >= 0 || rssi < -100) {
+		rssi = -100;
+	}
+	if (rssi > -50) {
+		rssi = -50;
+	}
+	return (rssi + 100) * 2;
+}
+
+
+
+
 String add_sensor_type(const String& sensor_text) {
 	RESERVE_STRING(s, SMALL_STR);
 	s = sensor_text;

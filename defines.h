@@ -58,6 +58,7 @@ constexpr const unsigned long SAMPLETIME_NPM_MS = 60000;
 constexpr const unsigned long SAMPLETIME_MHZ16_MS = 10000;
 constexpr const unsigned long SAMPLETIME_MHZ19_MS = 10000;
 constexpr const unsigned long SAMPLETIME_CCS811_MS = 10000;
+constexpr const unsigned long SAMPLETIME_Cairsens_MS = 10000;
 
 
 constexpr const unsigned long SAMPLETIME_GPS_MS = 50;

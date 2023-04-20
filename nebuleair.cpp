@@ -624,6 +624,190 @@ struct RGB interpolateCOV(float valueSensor, int step1, int step2, bool correcti
 	return result;
 }
 
+
+struct RGB colorNO2(int valueSensor, int step1, int step2, int step3, int step4, int step5, bool correction)
+{
+	struct RGB result;
+	uint16_t rgb565;
+
+	if (valueSensor == 0)
+	{
+		result.R = 80;
+		result.G = 240; //blue
+		result.B = 230;
+	}
+	else if (valueSensor > 0 && valueSensor <= step5)
+	{
+		if (valueSensor <= step1)
+		{
+			result.R = 80;
+			result.G = 240; //blue
+			result.B = 230;
+		}
+		else if (valueSensor > step1 && valueSensor <= step2)
+		{
+			result.R = 80;
+			result.G = 204; //green
+			result.B = 170;
+		}
+		else if (valueSensor > step2 && valueSensor <= step3)
+		{
+			result.R = 237;
+			result.G = 230; //yellow
+			result.B = 97;
+		}
+		else if (valueSensor > step3 && valueSensor <= step4)
+		{
+			result.R = 237;
+			result.G = 94; //orange
+			result.B = 88;
+		}
+		else if (valueSensor > step4 && valueSensor <= step5)
+		{
+			result.R = 136;
+			result.G = 26; //red
+			result.B = 51;
+		}
+	}
+	else if (valueSensor > step5)
+	{
+		result.R = 115;
+		result.G = 40; //violet
+		result.B = 125;
+	}
+	else
+	{
+		result.R = 0;
+		result.G = 0;
+		result.B = 0;
+	}
+
+	//Gamma Correction
+
+	if (correction == true)
+	{
+		result.R = pgm_read_byte(&gamma8[result.R]);
+		result.G = pgm_read_byte(&gamma8[result.G]);
+		result.B = pgm_read_byte(&gamma8[result.B]);
+	}
+
+	rgb565 = ((result.R & 0b11111000) << 8) | ((result.G & 0b11111100) << 3) | (result.B >> 3);
+	//Debug.println(rgb565); // to get list of color if drawGradient is acitvated
+	return result;
+}
+
+struct RGB interpolateNO2(float valueSensor, int step1, int step2, int step3, int step4, int step5, bool correction)
+{
+
+	byte endColorValueR;
+	byte startColorValueR;
+	byte endColorValueG;
+	byte startColorValueG;
+	byte endColorValueB;
+	byte startColorValueB;
+
+	int valueLimitHigh;
+	int valueLimitLow;
+	struct RGB result;
+	uint16_t rgb565;
+
+	if (valueSensor == 0)
+	{
+
+		result.R = 80;
+		result.G = 240; //blue
+		result.B = 230;
+	}
+	else if (valueSensor > 0 && valueSensor <= step5)
+	{
+		if (valueSensor <= step1)
+		{
+			valueLimitHigh = step1;
+			valueLimitLow = 0;
+			endColorValueR = 80;
+			startColorValueR = 80; //blue to green
+			endColorValueG = 204;
+			startColorValueG = 240;
+			endColorValueB = 170;
+			startColorValueB = 230;
+		}
+		else if (valueSensor > step1 && valueSensor <= step2)
+		{
+			valueLimitHigh = step2;
+			valueLimitLow = step1;
+			endColorValueR = 237;
+			startColorValueR = 80;
+			endColorValueG = 230; //green to yellow
+			startColorValueG = 204;
+			endColorValueB = 97;
+			startColorValueB = 170;
+		}
+		else if (valueSensor > step2 && valueSensor <= step3)
+		{
+			valueLimitHigh = step3;
+			valueLimitLow = step2;
+			endColorValueR = 237;
+			startColorValueR = 237;
+			endColorValueG = 94; //yellow to orange
+			startColorValueG = 230;
+			endColorValueB = 88;
+			startColorValueB = 97;
+		}
+		else if (valueSensor > step3 && valueSensor <= step4)
+		{
+
+			valueLimitHigh = step4;
+			valueLimitLow = step3;
+			endColorValueR = 136;
+			startColorValueR = 237;
+			endColorValueG = 26; // orange to red
+			startColorValueG = 94;
+			endColorValueB = 51;
+			startColorValueB = 88;
+		}
+		else if (valueSensor > step4 && valueSensor <= step5)
+		{
+			valueLimitHigh = step5;
+			valueLimitLow = step4;
+			endColorValueR = 115;
+			startColorValueR = 136;
+			endColorValueG = 40; // red to violet
+			startColorValueG = 26;
+			endColorValueB = 125;
+			startColorValueB = 51;
+		}
+
+		result.R = (byte)(((endColorValueR - startColorValueR) * ((valueSensor - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueR);
+		result.G = (byte)(((endColorValueG - startColorValueG) * ((valueSensor - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueG);
+		result.B = (byte)(((endColorValueB - startColorValueB) * ((valueSensor - valueLimitLow) / (valueLimitHigh - valueLimitLow))) + startColorValueB);
+	}
+	else if (valueSensor > step5)
+	{
+		result.R = 115;
+		result.G = 40; //violet
+		result.B = 125;
+	}
+	else
+	{
+		result.R = 0;
+		result.G = 0;
+		result.B = 0;
+	}
+
+	//Gamma Correction
+
+	if (correction == true)
+	{
+		result.R = pgm_read_byte(&gamma8[result.R]);
+		result.G = pgm_read_byte(&gamma8[result.G]);
+		result.B = pgm_read_byte(&gamma8[result.B]);
+	}
+
+	rgb565 = ((result.R & 0b11111000) << 8) | ((result.G & 0b11111100) << 3) | (result.B >> 3);
+	//Debug.println(rgb565); // to get list of color if drawGradient is acitvated
+	return result;
+}
+
 struct RGB interpolateHumi(float valueSensor, int step1, int step2, bool correction) // Humi
 {
 
@@ -1011,6 +1195,11 @@ BMX280 bmx280;
 CCS811 ccs811(-1);
 
 /*****************************************************************
+ * Envea Cairsens declaration                                        *
+ *****************************************************************/
+CairsensUART cairsens(&serialNO2); 
+
+/*****************************************************************
  * Time                                       *
  *****************************************************************/
 
@@ -1021,6 +1210,7 @@ unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_NPM;
 unsigned long starttime_CCS811;
+unsigned long starttime_Cairsens;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -1108,6 +1298,8 @@ float last_value_BMX280_P = -1.0;
 float last_value_BME280_H = -1.0;
 
 float last_value_no2 = -1.0;
+uint32_t no2_sum = 0;
+uint16_t no2_val_count = 0;
 
 uint32_t sds_pm10_sum = 0;
 uint32_t sds_pm25_sum = 0;
@@ -1152,6 +1344,7 @@ String last_value_NPM_version;
 unsigned long SDS_error_count;
 unsigned long NPM_error_count;
 unsigned long CCS811_error_count;
+unsigned long Cairsens_error_count;
 unsigned long WiFi_error_count;
 
 unsigned long last_page_load = millis();
@@ -1896,6 +2089,9 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			  "<div>"
 			  "<input form='main' type='radio' id='cov' name='{n}' value='6' {g}>"
 			  "<label for='cov'>COV</label>"
+			  "</div>"
+			  "<input form='main' type='radio' id='no2' name='{n}' value='7' {h}>"
+			  "<label for='no2'>NO2</label>"
 			  "</div>");
 
 		switch (t_value.toInt())
@@ -1908,6 +2104,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 1:
 			s.replace("{a}", "");
@@ -1917,6 +2114,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 2:
 			s.replace("{a}", "");
@@ -1926,6 +2124,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 3:
 			s.replace("{a}", "");
@@ -1935,6 +2134,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 4:
 			s.replace("{a}", "");
@@ -1944,6 +2144,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "checked");
 			s.replace("{f}", "");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 5:
 			s.replace("{a}", "");
@@ -1953,6 +2154,7 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "checked");
 			s.replace("{g}", "");
+			s.replace("{h}", "");
 			break;
 		case 6:
 			s.replace("{a}", "");
@@ -1962,6 +2164,17 @@ static void add_radio_input(String &page_content, const ConfigShapeId cfgid, con
 			s.replace("{e}", "");
 			s.replace("{f}", "");
 			s.replace("{g}", "checked");
+			s.replace("{h}", "");
+			break;
+		case 7:
+			s.replace("{a}", "");
+			s.replace("{b}", "");
+			s.replace("{c}", "");
+			s.replace("{d}", "");
+			s.replace("{e}", "");
+			s.replace("{f}", "");
+			s.replace("{g}", "");
+			s.replace("{h}", "checked");
 			break;
 		}
 	}
@@ -2884,15 +3097,17 @@ static void webserver_values()
 	const String unit_Deg("°");
 	const String unit_P("hPa");
 	const String unit_T("°C");
-	const String unit_CO2("ppm");
 	const String unit_COV("ppb");
+	const String unit_NO2("µg/m³");
 	const String unit_NC();
 	const String unit_LA(F("dB(A)"));
 	float dew_point_temp;
 
+	
+
 	const int signal_quality_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
-	const int signal_quality_nbiot = calcWiFiSignalQuality(last_signal_strength_nbiot);
-	const int signal_quality_lorawan = calcWiFiSignalQuality(last_signal_strength_lorawan);
+	const int signal_quality_nbiot = calcNBIoTSignalQuality(last_signal_strength_nbiot);
+	const int signal_quality_lorawan = calcLoRaWANSignalQuality(last_signal_strength_lorawan);
 	debug_outln_info(F("ws: values ..."));
 	if (!count_sends)
 	{
@@ -2925,14 +3140,14 @@ static void webserver_values()
 		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0), "%");
 	};
 
-	auto add_table_co2_value = [&page_content](const __FlashStringHelper *sensor, const __FlashStringHelper *param, const float &value)
+	auto add_table_no2_value = [&page_content](const __FlashStringHelper *sensor, const __FlashStringHelper *param, const float &value)
 	{
-		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0).substring(0, check_display_value(value, -1, 1, 0).indexOf(".")), "ppm"); //remove after .
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0).substring(0, check_display_value(value, -1, 1, 0).indexOf(".")), "μg/m3"); 
 	};
 
 	auto add_table_voc_value = [&page_content](const __FlashStringHelper *sensor, const __FlashStringHelper *param, const float &value)
 	{
-		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0).substring(0, check_display_value(value, -1, 1, 0).indexOf(".")), "ppb"); //remove after .
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0).substring(0, check_display_value(value, -1, 1, 0).indexOf(".")), "ppb"); 
 	};
 
 	auto add_table_value = [&page_content](const __FlashStringHelper *sensor, const __FlashStringHelper *param, const String &value, const String &unit)
@@ -2980,6 +3195,13 @@ static void webserver_values()
 	{
 		const char *const sensor_name = SENSORS_CCS811;
 		add_table_voc_value(FPSTR(sensor_name), FPSTR(INTL_VOC), last_value_CCS811);
+		page_content += FPSTR(EMPTY_ROW);
+	}
+
+	if (cfg::enveano2_read)
+	{
+		const char *const sensor_name = SENSORS_ENVEANO2;
+		add_table_no2_value(FPSTR(sensor_name), FPSTR(INTL_NO2), last_value_no2);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 
@@ -3112,6 +3334,10 @@ static void webserver_status()
 	if (cfg::ccs811_read)
 	{
 		add_table_row_from_value(page_content, FPSTR(SENSORS_CCS811), String(CCS811_error_count));
+	}
+	if (cfg::enveano2_read)
+	{
+		add_table_row_from_value(page_content, FPSTR(SENSORS_CCS811), String(Cairsens_error_count));
 	}
 	server.sendContent(page_content);
 	page_content = emptyString;
@@ -4196,6 +4422,9 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
 	return sum_send_time;
 }
 
+
+//REVOIR ICI
+
 static unsigned long sendSensorCommunityNBIoT(const String &data, const int pin, const __FlashStringHelper *sensorname, const char *replace_str)
 {
 	unsigned long sum_send_time = 0;
@@ -4211,7 +4440,7 @@ static unsigned long sendSensorCommunityNBIoT(const String &data, const int pin,
 		data_sensorcommunity.replace(replace_str, emptyString);
 		data_sensorcommunity += "]}";
 		Debug.println(data_sensorcommunity);
-		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
+		// sum_send_time = sendDataNBIoT(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
 	}
 
 	return sum_send_time;
@@ -4355,6 +4584,52 @@ static void fetchSensorCCS811(String &s)
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(sensor_name));
 }
+
+
+/*****************************************************************
+ * read Cairsens sensor values                              *
+ *****************************************************************/
+static void fetchSensorCairsens(String &s)
+{
+	const char *const sensor_name = SENSORS_ENVEANO2;
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(sensor_name));
+
+	uint8_t no2_val = 0;
+
+	if(cairsens.getNO2InstantVal(no2_val) == CairsensUART::NO_ERROR)
+    {
+      no2_sum += no2_val;
+	  no2_val_count++;
+	  debug_outln(String(no2_val_count), DEBUG_MAX_INFO);
+    }
+    else
+    {
+      Debug.println("Could not get Cairsens NOX value");
+    }
+
+	if (send_now && cfg::sending_intervall_ms == 120000)
+	{
+		last_value_no2 = -1.0f;
+
+		if (no2_val_count >= 12)
+		{
+			last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+			add_Value2Json(s, F("CAIRSENS_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+		else
+		{
+			Cairsens_error_count++;
+		}
+
+		no2_sum = 0;
+		no2_val_count = 0;
+	}
+
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(sensor_name));
+}
+
 
 /*****************************************************************
  * read SDS011 sensor values                                     *
@@ -5632,7 +5907,7 @@ void setup()
 	if (cfg::enveano2_read)
 	{
 		serialNO2.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, NO2_SERIAL_RX, NO2_SERIAL_TX); //OK
-		Debug.println("Envea Cairsens NO2... serialN02 9600 8N1");
+		Debug.println("Envea Cairsens NO2... serialN02 9600 8N1 SoftwareSerial");
 		serialNO2.setTimeout((4 * 12 * 1000) / 9600);
 	}
 
@@ -5758,6 +6033,11 @@ void setup()
 	if (cfg::ccs811_read)
 	{
 		starttime_CCS811 = starttime;
+	}
+
+	if (cfg::enveano2_read)
+	{
+		starttime_Cairsens = starttime;
 	}
 
 	if (cfg::has_nbiot)
@@ -6005,7 +6285,7 @@ void setup()
 
 void loop()
 {
-	String result_SDS, result_NPM, result_CCS811;
+	String result_SDS, result_NPM, result_CCS811, result_Cairsens;
 
 	unsigned sum_send_time = 0;
 
@@ -6133,6 +6413,16 @@ void loop()
 		}
 	}
 
+	//if (cfg::envean02_read && (!ccs811_init_failed))
+	if (cfg::enveano2_read)
+	{
+		if ((msSince(starttime_Cairsens) > SAMPLETIME_Cairsens_MS && no2_val_count < 11) || send_now)
+		{
+			starttime_Cairsens = act_milli;
+			fetchSensorCairsens(result_Cairsens);
+		}
+	}
+
 	//AJOUTER BMX SAUF SI ON GARDE LE MODELE SC
 
 	//if (cfg::has_wifi && WiFi.waitForConnectResult(10000) == WL_CONNECTED)
@@ -6152,6 +6442,11 @@ void loop()
 		if (cfg::has_wifi && !wifi_connection_lost)
 		{
 			last_signal_strength_wifi = WiFi.RSSI();
+		}
+
+		if (cfg::has_nbiot && !nbiot_connection_lost)
+		{
+			last_signal_strength_nbiot = lte.rssi();
 		}
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
@@ -6201,6 +6496,12 @@ void loop()
 		if (cfg::ccs811_read && (!ccs811_init_failed))
 		{
 			data += result_CCS811;
+		}
+
+		//if (cfg::enveano2_read && (!ccs811_init_failed))
+		if (cfg::enveano2_read)
+		{
+			data += result_Cairsens;
 		}
 
 		add_Value2Json(data, F("samples"), String(sample_count));
@@ -6307,6 +6608,11 @@ void loop()
 				if (cfg::ccs811_read && last_value_CCS811 != -1.0)
 				{
 					displayColor_value = interpolateCOV(last_value_CCS811, 800, 1500, gamma_correction); //REVOIR GRadient
+				}
+			case 7:
+				if (cfg::enveano2_read && last_value_no2 != -1.0)
+				{
+					displayColor_value = colorNO2(last_value_no2, 40, 90, 120 , 230, 340, gamma_correction);
 				}
 				else
 				{
