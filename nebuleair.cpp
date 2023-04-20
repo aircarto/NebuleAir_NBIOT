@@ -2594,6 +2594,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_radio_input(page_content, Config_value_displayed, FPSTR(INTL_VALUE_DISPLAYED));
 
 	server.sendContent(page_content);
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(7));
 
@@ -3337,7 +3338,7 @@ static void webserver_status()
 	}
 	if (cfg::enveano2_read)
 	{
-		add_table_row_from_value(page_content, FPSTR(SENSORS_CCS811), String(Cairsens_error_count));
+		add_table_row_from_value(page_content, FPSTR(SENSORS_ENVEANO2), String(Cairsens_error_count));
 	}
 	server.sendContent(page_content);
 	page_content = emptyString;
@@ -4614,7 +4615,7 @@ static void fetchSensorCairsens(String &s)
 		if (no2_val_count >= 12)
 		{
 			last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
-			add_Value2Json(s, F("CAIRSENS_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
 		}
 		else
@@ -5277,7 +5278,7 @@ void os_getDevKey(u1_t *buf) { memcpy_P(buf, appkey_hex, 16); }
 //Initialiser avec les valeurs -1.0,-128.0 = valeurs par défaut qui doivent être filtrées
 
 uint8_t datalora[LEN_PAYLOAD_LORA] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
-//		    			conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+//		    			              conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
 
 //Peut-être changer l'indianess pour temp = inverser
 
