@@ -5460,7 +5460,6 @@ void onEvent(ev_t ev)
 		// Schedule next transmission
 		os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
 		Debug.println(F("Next transmission scheduled"));
-		//maybe boolean here to prevent problem if wifi transmission starts...
 		break;
 	case EV_LOST_TSYNC:
 		Debug.println(F("EV_LOST_TSYNC"));
@@ -6765,7 +6764,7 @@ void loop()
 		if (cfg::has_lora && lorachip)
 		{
 			prepareTxFrameLoRa();
-			do_send(&sendjob);
+			//do_send(&sendjob); PAS BESOIN??????
 
 			//os_run_loop_once here ?
 		}
