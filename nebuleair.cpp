@@ -3218,10 +3218,10 @@ static void webserver_values()
 		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_nbiot), "%");
 	}
 
-	// if(cfg::has_lora){
-	// add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_lorawan), "dBm");
-	// add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_lorawan), "%");
-	// }
+	if(cfg::has_lora){
+	add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_lorawan), "dBm");
+	add_table_value(F("LoRaWAN"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_lorawan), "%");
+	}
 
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += FPSTR(BR_TAG);
@@ -5362,13 +5362,12 @@ void do_send(osjob_t *j)
 		Debug.print("Size of Data:");
 		Debug.println(sizeof(datalora));
 
-		LMIC_setTxData2(1, datalora, sizeof(datalora) - 1, 0);
+		//LMIC_setTxData2(1, datalora, sizeof(datalora) - 1, 0);
+		LMIC_setTxData2(1, datalora, sizeof(datalora) - 1, 1); //For confirmed uplin => cf ACK
 
 		Debug.println(F("Packet queued"));
 	}
 	// Next TX is scheduled after TX_COMPLETE event.
-
-	//lora_connection_lost = true; Par defaut => reviens tout de suite après AVOIR!!!
 }
 
 void onEvent(ev_t ev)
@@ -5448,15 +5447,14 @@ void onEvent(ev_t ev)
 	case EV_TXCOMPLETE:
 		Debug.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
 		if (LMIC.txrxFlags & TXRX_ACK)
-			Debug.println(F("Received ack"));
-		if (LMIC.dataLen)
 		{
-			Debug.print(F("Received "));
-			Debug.print(LMIC.dataLen);
-			Debug.println(F(" bytes of payload"));
+			Debug.println(F("Received ack"));
+			lora_connection_lost = false;
+		}else{
+			Debug.println(F("Ack not received"));
+			lora_connection_lost = true;
 		}
 
-		lora_connection_lost = false;
 		// Schedule next transmission
 		os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
 		Debug.println(F("Next transmission scheduled"));
@@ -6459,6 +6457,13 @@ void loop()
 		{
 			last_signal_strength_nbiot = lte.rssi();
 		}
+
+		if (cfg::has_lora && !lora_connection_lost)
+		{
+			last_signal_strength_lora = lmic.rssi;
+		}
+
+
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
 		//data_custom
@@ -6530,9 +6535,9 @@ void loop()
 			add_Value2Json(data, F("signal_nbiot"), String(last_signal_strength_nbiot));
 		}
 
-		// if(cfg::has_lora){
-		// add_Value2Json(data, F("signal_lora"), String(last_signal_strength_lorawan));
-		// }
+		if(cfg::has_lora){
+		add_Value2Json(data, F("signal_lora"), String(last_signal_strength_lorawan));
+		}
 
 		add_Value2Json(data, F("rgpd"), String(cfg::rgpd));
 
