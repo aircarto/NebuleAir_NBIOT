@@ -279,7 +279,8 @@ public:
     LTE_Shield_error_t setPort(int api, int port);
     LTE_Shield_error_t setHeader(int api, const char *header);
     LTE_Shield_error_t setJSON(const String &json);
-    LTE_Shield_error_t setBytes(const uint8_t *data, size_t size);
+    // LTE_Shield_error_t setBytes(const uint8_t *data, size_t size);
+    LTE_Shield_error_t setBytes(const char *data);
     LTE_Shield_error_t sendJSON(int profile);
     LTE_Shield_error_t readJSON(void);
     LTE_Shield_error_t readBytes(void);
@@ -288,6 +289,14 @@ public:
     LTE_Shield_error_t deleteBytes(void);
     LTE_Shield_error_t sendPOSTRequest(int profile, const char *path);
     LTE_Shield_error_t sendPOSTRequestByte(int profile, const char *path);
+    LTE_Shield_error_t setSSL(int api, int id);
+    // LTE_Shield_error_t setCAroot(const String &caroot, const char *name);
+    LTE_Shield_error_t setCAroot(const char *caroot, const char *name);
+    LTE_Shield_error_t setSecProfile1(int id);
+    LTE_Shield_error_t setSecProfile2(int id, const char *name);
+    LTE_Shield_error_t uploadCA(const String &cert, const char *name);
+    LTE_Shield_error_t setCArootBytes(const uint8_t *caroot, size_t size, const char *name);
+    LTE_Shield_error_t uploadCABytes(const uint8_t *caroot, size_t size, const char *name);
 
     // GPS
     typedef enum
