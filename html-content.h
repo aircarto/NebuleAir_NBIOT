@@ -59,6 +59,10 @@ input[type=submit][form=main]{color:#fff;text-align:left;cursor:pointer;border-r
 input[type=submit][form=main]:hover{background:#d44}\
 input[type=submit][form=secondar]{color:#fff;text-align:center;cursor:pointer;border-radius:5px;font-size:medium;background:#777;padding:3px!important;display:inline;border-style:none}\
 input[type=submit][form=secondar]:hover{background:#aaa}\
+input[type=submit][form=reset]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit][form=reset]:hover{background:#d44}\
+input[type=submit][form=remove]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit][form=remove]:hover{background:#d44}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#438DBF;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
 .tab{padding:10px 20px;display:inline-block;color:#333}\
@@ -119,13 +123,13 @@ function load_lte_list(){var x=new XMLHttpRequest();x.open('GET','/lte');x.onloa
 // function setLTE(lte){document.getElementById('lteid').value=lte.innerText||lte.textContent;}\
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
-<table><tr><td><form method='POST' action='/removeConfig'>\
-<input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
+<table><tr><td><form id='remove' method='POST' action='/removeConfig'>\
+<input type='submit' form='remove' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
 <td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
-"<table><tr><td><form method='POST' action='/reset'>" \
-"<input type='submit' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
+"<table><tr><td><form id='reset' method='POST' action='/reset'>" \
+"<input type='submit' form='reset' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
 "</form></td><td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\

@@ -6601,7 +6601,7 @@ void setup()
 
 		// Start job (sending automatically starts OTAA too)
 		do_send(&sendjob); // values are -1, -128 etc. they can be easily filtered
-	}
+	
 
 	//AJOUTER lora_connection_lost ??
 
@@ -6620,7 +6620,8 @@ void setup()
 	Debug.print("Configuration:");
 	Debug.println(booltobyte(configlorawan));
 	datalora[0] = booltobyte(configlorawan);
-
+	}
+	
 	Debug.printf("End of void setup()\n");
 	starttime_waiter = millis();
 }
