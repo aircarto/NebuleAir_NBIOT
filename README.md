@@ -80,12 +80,12 @@ The .ini file should be able to get all the needed boards, platforms and librari
 |GPIO23| 📶 lora MOSI |  |
 |GPIO25| unused |  |
 |GPIO26| 📶 lora DIO0 |  |
-|GPIO27| SARA-R4 TX | |
+|GPIO27| SARA-R4 RX | |
 |GPIO32| NextPM RX |  |
 |GPIO33| 💡LEDs |  |
 |GPIO34| 📶 lora DIO2 |  |
 |GPIO35| 📶 lora DIO1 |  |
-|GPIO36| SARA-R4 RX | |
+|GPIO36| SARA-R4 TX | |
 |GPIO39| NextPM TX |  |
 
 ## PCB
