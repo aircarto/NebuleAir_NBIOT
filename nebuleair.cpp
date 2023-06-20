@@ -1930,6 +1930,16 @@ static void createLoggerConfigs()
 	{
 		loggerConfigs[LoggerCustom2].destport = 443;
 	}
+	loggerConfigs[LoggerNBIoTJson].destport = cfg::port_nbiot_json;
+	if (cfg::has_nbiot && cfg::nbiot_format == 0 && cfg::ssl_nbiot_json)
+	{
+		loggerConfigs[LoggerNBIoTJson].destport = 443;
+	}
+	loggerConfigs[LoggerNBIoTByte].destport = cfg::port_nbiot_byte;
+	if (cfg::has_nbiot && cfg::nbiot_format == 1 && cfg::ssl_nbiot_byte)
+	{
+		loggerConfigs[LoggerNBIoTByte].destport = 443;
+	}
 }
 
 /*****************************************************************
@@ -2573,7 +2583,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox_sensor(Config_ccs811_read, FPSTR(INTL_CCS811));
 
 	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
+	//server.sendContent(page_content);
 	//page_content = emptyString;
 
 	page_content += FPSTR(WEB_BR_LF_B);
@@ -2649,8 +2659,9 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR("<b>");
 	page_content += FPSTR(INTL_API_NBIOT_JSON);
 	page_content += FPSTR(WEB_B_BR);
-	page_content += form_checkbox(Config_ssl_nbiot_json, FPSTR(WEB_HTTPS), false);
-	page_content += FPSTR(WEB_BRACE_BR);
+	// page_content += form_checkbox(Config_ssl_nbiot_json, FPSTR(WEB_HTTPS), false);
+	// page_content += FPSTR(WEB_BRACE_BR);
+	page_content += FPSTR("<br/><br/>");
 	server.sendContent(page_content);
 	page_content = FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_nbiot_json, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_JSON - 1);
@@ -2663,8 +2674,9 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR("<b>");
 	page_content += FPSTR(INTL_API_NBIOT_BYTE);
 	page_content += FPSTR(WEB_B_BR);
-	page_content += form_checkbox(Config_ssl_nbiot_byte, FPSTR(WEB_HTTPS), false);
-	page_content += FPSTR(WEB_BRACE_BR);
+	// page_content += form_checkbox(Config_ssl_nbiot_byte, FPSTR(WEB_HTTPS), false);
+	// page_content += FPSTR(WEB_BRACE_BR);
+	page_content += FPSTR("<br/><br/>");
 	server.sendContent(page_content);
 	page_content = FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_nbiot_byte, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_BYTE - 1);
