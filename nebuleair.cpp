@@ -102,7 +102,6 @@ namespace cfg
 	// (in)active sensors
 	bool sds_read = SDS_READ;
 	bool npm_read = NPM_READ;
-	// bool npm_fulltime = NPM_FULLTIME;  //A VOIR
 	bool bmx280_read = BMX280_READ;
 	bool ccs811_read = CCS811_READ;
 	bool enveano2_read = ENVEANO2_READ;
@@ -144,6 +143,22 @@ namespace cfg
 	char user_custom2[LEN_USER_CUSTOM2] = USER_CUSTOM2;
 	char pwd_custom2[LEN_CFG_PASSWORD] = PWD_CUSTOM2;
 
+	// API AirCarto NBIoT json
+	char host_nbiot_json[LEN_HOST_CUSTOM];
+	char url_nbiot_json[LEN_URL_CUSTOM];
+	bool ssl_nbiot_json = SSL_CUSTOM;
+	unsigned port_nbiot_json = PORT_CUSTOM;
+	char user_nbiot_json[LEN_USER_CUSTOM] = USER_CUSTOM;
+	char pwd_nbiot_json[LEN_CFG_PASSWORD] = PWD_CUSTOM;
+
+	// API AirCarto NBIoT byte
+	char host_nbiot_byte[LEN_HOST_CUSTOM];
+	char url_nbiot_byte[LEN_URL_CUSTOM];
+	bool ssl_nbiot_byte = SSL_CUSTOM;
+	unsigned port_nbiot_byte = PORT_CUSTOM;
+	char user_nbiot_byte[LEN_USER_CUSTOM] = USER_CUSTOM;
+	char pwd_nbiot_byte[LEN_CFG_PASSWORD] = PWD_CUSTOM;
+
 	// First load
 	void initNonTrivials(const char *id)
 	{
@@ -160,6 +175,10 @@ namespace cfg
 		strcpy_P(url_custom, URL_CUSTOM);
 		strcpy_P(host_custom2, HOST_CUSTOM2);
 		strcpy_P(url_custom2, URL_CUSTOM2);
+		strcpy_P(host_nbiot_json, HOST_NBIOT_JSON);
+		strcpy_P(url_nbiot_json, URL_NBIOT_JSON);
+		strcpy_P(host_nbiot_byte, HOST_NBIOT_BYTE);
+		strcpy_P(url_nbiot_byte, URL_NBIOT_BYTE);
 
 		if (!*fs_ssid)
 		{
@@ -173,14 +192,7 @@ namespace cfg
 
 bool configlorawan[8] = {false, false, false, false, false, false, false, false};
 
-// configlorawan[0] = cfg::sds_read;
-// configlorawan[1] = cfg::npm_read ;
-// configlorawan[2] = cfg::bmx280_read;
-// configlorawan[3] = cfg::ccs811_read;
-// configlorawan[4] = cfg::has_led_value;
-// configlorawan[5] = cfg::enveano2_read;  //REVOIR
-// configlorawan[6] = cfg::rgpd;
-// configlorawan[7] = cfg::has_wifi;
+//configuration summary for NBIoT
 
 bool confignbiot[8] = {false, false, false, false, false, false, false, false};
 
@@ -274,17 +286,6 @@ struct RGB displayColor_NBIoT
 extern const uint8_t gamma8[]; //for gamma correction
 
 bool gamma_correction = GAMMA;
-
-// uint16_t myRED = display.color565(255, 0, 0);
-// uint16_t myGREEN = display.color565(0, 255, 0);
-// uint16_t myBLUE = display.color565(0, 255, 255);
-// uint16_t myWHITE = display.color565(255, 255, 255);
-// uint16_t myYELLOW = display.color565(255, 255, 0);
-// uint16_t myCYAN = display.color565(0, 255, 255);
-// uint16_t myMAGENTA = display.color565(255, 0, 255);
-// uint16_t myBLACK = display.color565(0, 0, 0);
-// uint16_t myCUSTOM = display.color565(displayColor.R, displayColor.G, displayColor.B);
-// uint16_t myCOLORS[8] = {myRED, myGREEN, myBLUE, myWHITE, myYELLOW, myCYAN, myMAGENTA, myBLACK};
 
 // REVOIR LES INTERPOLATE
 
@@ -1181,17 +1182,7 @@ uint8_t datanbiot[LEN_PAYLOAD_NBIOT] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 
 // A VOIR
 
-// bool nbiotchip;
-// bool nbiottest(int lora_dio0)
-// {
-// 	pinMode(lora_dio0, INPUT_PULLUP);
-// 	delay(200);
-// 	if (!digitalRead(lora_dio0))
-// 	{ // low => LoRa chip detected
-// 		return true;
-// 	}
-// 	return false;
-// }
+//Testeur de connection NBIoT
 
 /*****************************************************************
  * BMP/BME280 declaration                                        *
@@ -2378,6 +2369,7 @@ static void webserver_config_send_body_get(String &page_content)
 					  "<input form='main' class='radio' id='r6' name='group' type='radio'>"
 					  "<input form='main' class='radio' id='r7' name='group' type='radio'>"
 					  "<input form='main' class='radio' id='r8' name='group' type='radio'>"
+					  "<input form='main' class='radio' id='r9' name='group' type='radio'>"
 					  "<div class='tabs'>"
 					  "<label class='tab' id='tab1' for='r1'>");
 	page_content += FPSTR(INTL_WIFI_SETTINGS);
@@ -2398,9 +2390,12 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(INTL_LEDS);
 	page_content += F("</label>"
 					  "<label class='tab' id='tab7' for='r7'>");
-	page_content += FPSTR(INTL_APIS);
+	page_content += FPSTR(INTL_APIS_WIFI);
 	page_content += F("</label>"
 					  "<label class='tab' id='tab8' for='r8'>");
+	page_content += FPSTR(INTL_APIS_NBIOT);
+	page_content += F("</label>"
+					  "<label class='tab' id='tab9' for='r9'>");
 	page_content += FPSTR(INTL_RGPD);
 	page_content += F("</label></div>"
 					  "<div class='panels'>"
@@ -2651,12 +2646,39 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(8));
+	page_content += FPSTR("<b>");
+	page_content += FPSTR(INTL_API_NBIOT_JSON);
+	page_content += FPSTR(WEB_B_BR);
+	page_content += form_checkbox(Config_ssl_nbiot_json, FPSTR(WEB_HTTPS), false);
+	page_content += FPSTR(WEB_BRACE_BR);
+	server.sendContent(page_content);
+	page_content = FPSTR(TABLE_TAG_OPEN);
+	add_form_input(page_content, Config_host_nbiot_json, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_JSON - 1);
+	add_form_input(page_content, Config_url_nbiot_json, FPSTR(INTL_PATH), LEN_URL_NBIOT_JSON - 1);
+	add_form_input(page_content, Config_port_nbiot_json, FPSTR(INTL_PORT), MAX_PORT_DIGITS_NBIOT_JSON);
+	add_form_input(page_content, Config_user_nbiot_json, FPSTR(INTL_USER), LEN_USER_NBIOT_JSON - 1);
+	add_form_input(page_content, Config_pwd_nbiot_json, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += FPSTR("<br/><br/>");
+	page_content += FPSTR("<b>");
+	page_content += FPSTR(INTL_API_NBIOT_BYTE);
+	page_content += FPSTR(WEB_B_BR);
+	page_content += form_checkbox(Config_ssl_nbiot_byte, FPSTR(WEB_HTTPS), false);
+	page_content += FPSTR(WEB_BRACE_BR);
+	server.sendContent(page_content);
+	page_content = FPSTR(TABLE_TAG_OPEN);
+	add_form_input(page_content, Config_host_nbiot_byte, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_BYTE - 1);
+	add_form_input(page_content, Config_url_nbiot_byte, FPSTR(INTL_PATH), LEN_URL_NBIOT_BYTE - 1);
+	add_form_input(page_content, Config_port_nbiot_byte, FPSTR(INTL_PORT), MAX_PORT_DIGITS_NBIOT_BYTE);
+	add_form_input(page_content, Config_user_nbiot_byte, FPSTR(INTL_USER), LEN_USER_NBIOT_BYTE - 1);
+	add_form_input(page_content, Config_pwd_nbiot_byte, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	server.sendContent(page_content);
+	page_content = emptyString;
 
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(9));
 	//AJOUTER TEXTE, LIEN etc.
-
 	add_form_checkbox(Config_rgpd, FPSTR(INTL_RGPD_ACCEPT));
-
-	//page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("</div></div>");
 	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
@@ -2902,32 +2924,6 @@ static void webserver_wifi()
 /*****************************************************************
  * Webserver lte: show available LTE networks                  *
  *****************************************************************/
-
-// void printInfo(void)
-// {
-// 	String currentApn = "";
-// 	IPAddress ip(0, 0, 0, 0);
-
-// 	Debug.println(F("Connection info:"));
-// 	// APN Connection info: APN name and IP
-// 	if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
-// 	{
-// 		Debug.println("APN: " + String(currentApn));
-// 		Debug.print("IP: ");
-// 		Debug.println(ip);
-// 	}
-
-// 	// Operator name or number
-// 	if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
-// 	{
-// 		Debug.print("Operator: ");
-// 		Debug.println(currentOperator);
-// 	}
-
-// 	// Received signal strength
-// 	Debug.println("RSSI: " + String(lte.rssi()));
-// 	Debug.println();
-// }
 
 static void webserver_lte()
 {
@@ -4300,17 +4296,8 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 
 	switch (logger)
 	{
-	case LoggerSensorCommunity:
+	case LoggerNBIoTJson:
 		result = lte.sendPOSTRequest(0, url);
-		break;
-	case LoggerMadavi:
-		result = lte.sendPOSTRequest(1, url);
-		break;
-	case LoggerCustom:
-		result = lte.sendPOSTRequest(2, url);
-		break;
-	case LoggerCustom2:
-		result = lte.sendPOSTRequest(3, url);
 		break;
 	}
 
@@ -4453,11 +4440,8 @@ static unsigned long sendDataNBIoTBytes(const LoggerEntry logger, const uint8_t 
 
 	switch (logger)
 	{
-	case LoggerCustom:
-		result = lte.sendPOSTRequestByte(2, url);
-		break;
-	case LoggerCustom2:
-		result = lte.sendPOSTRequestByte(3, url);
+	case LoggerNBIoTByte:
+		result = lte.sendPOSTRequestByte(0, url);
 		break;
 	}
 
@@ -4514,28 +4498,28 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
 	return sum_send_time;
 }
 
-//REVOIR ICI
+//ON N'ENVOIE PAS DU TOUT SUR SC EN NBIOT!
 
-static unsigned long sendSensorCommunityNBIoT(const String &data, const int pin, const __FlashStringHelper *sensorname, const char *replace_str)
-{
-	unsigned long sum_send_time = 0;
+// static unsigned long sendSensorCommunityNBIoT(const String &data, const int pin, const __FlashStringHelper *sensorname, const char *replace_str)
+// {
+// 	unsigned long sum_send_time = 0;
 
-	if (cfg::send2dusti && data.length())
-	{
-		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
-		data_sensorcommunity = FPSTR(data_first_part);
+// 	if (cfg::send2dusti && data.length())
+// 	{
+// 		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
+// 		data_sensorcommunity = FPSTR(data_first_part);
 
-		debug_outln_info(F("## Sending to sensor.community - "), sensorname);
-		data_sensorcommunity += data;
-		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
-		data_sensorcommunity.replace(replace_str, emptyString);
-		data_sensorcommunity += "]}";
-		Debug.println(data_sensorcommunity);
-		sum_send_time = sendDataNBIoT(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
-	}
+// 		debug_outln_info(F("## Sending to sensor.community - "), sensorname);
+// 		data_sensorcommunity += data;
+// 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
+// 		data_sensorcommunity.replace(replace_str, emptyString);
+// 		data_sensorcommunity += "]}";
+// 		Debug.println(data_sensorcommunity);
+// 		sum_send_time = sendDataNBIoT(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
+// 	}
 
-	return sum_send_time;
-}
+// 	return sum_send_time;
+// }
 
 /*****************************************************************
  * send data as csv to serial out                                *
@@ -5252,7 +5236,7 @@ static unsigned long sendDataToOptionalApis(const String &data)
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api: "));
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api wifi: "));
 		sum_send_time += sendData(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom, cfg::ssl_custom);
 	}
 
@@ -5283,13 +5267,7 @@ static unsigned long sendDataToOptionalApisNBIoT(const String &data)
 
 	Debug.println(data);
 
-	if (cfg::send2madavi)
-	{
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("madavi.de: "));
-		sum_send_time += sendDataNBIoT(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI, cfg::ssl_madavi);
-	}
-
-	if (cfg::send2custom)
+	if (cfg::nbiot_format == 0)
 	{
 		String data_to_send = data;
 		data_to_send.remove(0, 1);
@@ -5297,20 +5275,8 @@ static unsigned long sendDataToOptionalApisNBIoT(const String &data)
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT: "));
-		sum_send_time += sendDataNBIoT(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom, cfg::ssl_custom);
-	}
-
-	if (cfg::send2custom2)
-	{
-		String data_to_send = data;
-		data_to_send.remove(0, 1);
-		String data_4_custom(F("{\"nebuleairid\": \""));
-		data_4_custom += esp_chipid;
-		data_4_custom += "\", ";
-		data_4_custom += data_to_send;
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("atmosud api NBIoT: "));
-		sum_send_time += sendDataNBIoT(LoggerCustom2, data_4_custom, 0, cfg::host_custom2, cfg::url_custom2, cfg::ssl_custom2);
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT json: "));
+		sum_send_time += sendDataNBIoT(LoggerNBIoTJson, data_4_custom, 0, cfg::host_nbiot_json, cfg::url_nbiot_json, cfg::ssl_nbiot_json);
 	}
 
 	return sum_send_time;
@@ -5320,32 +5286,18 @@ static unsigned long sendDataToOptionalApisNBIoTBytes(const uint8_t *data, size_
 {
 	unsigned long sum_send_time = 0;
 
-	if (cfg::send2custom)
+	if (cfg::nbiot_format == 1)
 	{
-		String headerstr22 = "2:SignalNBIoT:" + String(last_signal_strength_nbiot);
+		String headerstr02 = "2:SignalNBIoT:" + String(last_signal_strength_nbiot);
 
-		if (lte.setHeader(2, headerstr22.c_str()) == LTE_SHIELD_SUCCESS)
+		if (lte.setHeader(0, headerstr02.c_str()) == LTE_SHIELD_SUCCESS)
 		{
-			Debug.print("Header 2/2: ");
-			Debug.println(headerstr22);
+			Debug.print("Header 0/2: ");
+			Debug.println(headerstr02);
 		}
 
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT: "));
-		sum_send_time += sendDataNBIoTBytes(LoggerCustom, data, size, 0, cfg::host_custom, cfg::url_custom, cfg::ssl_custom);
-	}
-
-	if (cfg::send2custom2)
-	{
-		String headerstr32 = "2:SignalNBIoT:" + String(last_signal_strength_nbiot);
-
-		if (lte.setHeader(3, headerstr32.c_str()) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.print("Header 3/2: ");
-			Debug.println(headerstr32);
-		}
-
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("atmosud api NBIoT: "));
-		sum_send_time += sendDataNBIoTBytes(LoggerCustom2, data, size, 0, cfg::host_custom2, cfg::url_custom2, cfg::ssl_custom2);
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT byte: "));
+		sum_send_time += sendDataNBIoTBytes(LoggerNBIoTByte, data, size, 0, cfg::host_nbiot_byte, cfg::url_nbiot_byte, cfg::ssl_nbiot_byte);
 	}
 
 	return sum_send_time;
@@ -6269,22 +6221,22 @@ void setup()
 		Debug.println("RSSI: " + String(lte.rssi()));
 		Debug.println();
 
-		if (cfg::send2dusti)
+		if (cfg::nbiot_format == 0)
 		{
-			Debug.println("Set profile API Sensor.Community");
+			Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(0, HOST_SENSORCOMMUNITY) == LTE_SHIELD_SUCCESS)
+			if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Host 0: ");
-				Debug.println(HOST_SENSORCOMMUNITY);
+				Debug.println(cfg::host_nbiot_json);
 			}
 
-			if (cfg::ssl_dusti)
+			if (cfg::ssl_nbiot_json)
 			{
 
-				if (lte.setCAroot(dst_root_ca_x3, "certSC") == LTE_SHIELD_SUCCESS)
+				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
 				{
-					Debug.println("CA SC set up!");
+					Debug.println("CA AirCarto set up!");
 				}
 
 				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
@@ -6292,21 +6244,21 @@ void setup()
 					Debug.println("Set security profile 1");
 				}
 
-				if (lte.setSecProfile2(0, "certSC") == LTE_SHIELD_SUCCESS)
+				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
 				{
 					Debug.println("Set security profile 2");
 				}
 
 				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
 				{
-					Debug.println("SSL API Sensor.Community");
+					Debug.println("SSL API AirCarto");
 				}
 			}
-
-			if (lte.setPort(0, loggerConfigs[LoggerSensorCommunity].destport) == LTE_SHIELD_SUCCESS)
+			
+			if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
 			{
 				Debug.print("Port 0: ");
-				Debug.println(loggerConfigs[LoggerSensorCommunity].destport);
+				Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
 			}
 
 			if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
@@ -6315,103 +6267,19 @@ void setup()
 				Debug.println("0:Content-Type:application/json");
 			}
 
-			String headerstr01 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
-
-			if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 0/1: ");
-				Debug.println(headerstr01);
-			}
 		}
 
-		if (cfg::send2madavi)
-		{
-			Debug.println("Set profile API Madavi");
-
-			if (lte.setHost(1, HOST_MADAVI) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 1: ");
-				Debug.println(HOST_MADAVI);
-			}
-
-			if (cfg::ssl_madavi)
-			{
-				// if (lte.uploadCA(String(dst_root_ca_x3), "dst_root_ca_x3") == LTE_SHIELD_SUCCESS)
-				// {
-				// 	Debug.println("CA Madavi uploaded!");
-				// }
-
-				// if (lte.setCAroot(dst_root_ca_x3, "certMadavi") == LTE_SHIELD_SUCCESS)
-				// {
-				// 	Debug.println("CA Madavi set up!");
-				// }
-
-				// if (lte.setCArootBytes(dst_root_ca_x3_bytes, sizeof(dst_root_ca_x3_bytes), "certMadavi") == LTE_SHIELD_SUCCESS)
-				// {
-				// 	Debug.println("CA Madavi set up!");
-				// }
-
-				if (lte.uploadCABytes(dst_root_ca_x3_bytes, sizeof(dst_root_ca_x3_bytes), "dst_root_ca_x3") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA Madavi uploaded!");
-				}
-
-				delay(2000);
-				
-				if (lte.setCAroot("certMadavi", "dst_root_ca_x3.cert") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA Madavi set up!");
-				}
-
-				if (lte.setSecProfile1(1) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
-
-				if (lte.setSecProfile2(1, "certMadavi") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
-
-				if (lte.setSSL(1, 1) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API Madavi");
-				}
-			}
-
-			if (lte.setPort(1, loggerConfigs[LoggerMadavi].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 1: ");
-				Debug.println(loggerConfigs[LoggerMadavi].destport);
-			}
-
-			if (lte.setHeader(1, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 1/0: ");
-				Debug.println("0:Content-Type:application/json");
-			}
-
-			String headerstr11 = "1:X-Sensor:" + String(F(SENSOR_BASENAME)) + esp_chipid;
-
-			if (lte.setHeader(1, headerstr11.c_str()) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 1/1: ");
-				Debug.println(headerstr11);
-			}
-		}
-
-		if (cfg::send2custom)
+		if (cfg::nbiot_format == 1)
 		{
 			Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(2, cfg::host_custom) == LTE_SHIELD_SUCCESS)
-			//if (lte.setHost(2, "webhook.site") == LTE_SHIELD_SUCCESS)
+			if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
 			{
-				Debug.print("Host 2: ");
-				Debug.println(cfg::host_custom);
+				Debug.print("Host 0: ");
+				Debug.println(cfg::host_nbiot_byte);
 			}
 
-			if (cfg::ssl_custom)
+			if (cfg::ssl_nbiot_byte)
 			{
 
 				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
@@ -6419,130 +6287,43 @@ void setup()
 					Debug.println("CA AirCarto set up!");
 				}
 
-				if (lte.setSecProfile1(2) == LTE_SHIELD_SUCCESS)
+				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
 				{
 					Debug.println("Set security profile 1");
 				}
 
-				if (lte.setSecProfile2(2, "certAircarto") == LTE_SHIELD_SUCCESS)
+				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
 				{
 					Debug.println("Set security profile 2");
 				}
 
-				if (lte.setSSL(2, 2) == LTE_SHIELD_SUCCESS)
+				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
 				{
 					Debug.println("SSL API AirCarto");
 				}
 			}
 			
-			if (lte.setPort(2, loggerConfigs[LoggerCustom].destport) == LTE_SHIELD_SUCCESS)
+			if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
 			{
-				Debug.print("Port 2: ");
-				Debug.println(loggerConfigs[LoggerCustom].destport);
+				Debug.print("Port 0: ");
+				Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
 			}
 
-			if (cfg::nbiot_format == 0)
-			{
-				if (lte.setHeader(2, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+				if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
 				{
-					Debug.print("Header 2/0: ");
-					Debug.println("0:Content-Type:application/json");
-				}
-			}
-
-			if (cfg::nbiot_format == 1)
-			{
-				if (lte.setHeader(2, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 2/0: ");
+					Debug.print("Header 0/0: ");
 					Debug.println("0:Content-Type:application/octet-stream");
 				}
 
-				String headerstr21 = "1:Sensor:nebuleair-" + esp_chipid;
+				String headerstr01 = "1:Sensor:nebuleair-" + esp_chipid;
 
-				if (lte.setHeader(2, headerstr21.c_str()) == LTE_SHIELD_SUCCESS)
+				if (lte.setHeader(2, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
 				{
-					Debug.print("Header 2/1: ");
-					Debug.println(headerstr21);
+					Debug.print("Header 0/1: ");
+					Debug.println(headerstr01);
 				}
-				// if (lte.setHeader(2, "3:Content-Transfer-Encoding:8BIT") == LTE_SHIELD_SUCCESS)
-				// {
-				// 	Debug.print("Header 2/3: ");
-				// 	Debug.println("3:Content-Transfer-Encoding:base64"); //BINARY  Base64
-				// }
-			}
 		}
-
-		if (cfg::send2custom2)
-		{
-			Debug.println("Set profile API AtmoSud");
-			if (lte.setHost(3, cfg::host_custom2) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 3: ");
-				Debug.println(cfg::host_custom2);
-			}
-
-			if (cfg::ssl_custom2)
-			{
-
-				if (lte.setCAroot(ca_atmo, "certAtmosud") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA AtmoSud set up!");
-				}
-
-				if (lte.setSecProfile1(3) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
-
-				if (lte.setSecProfile2(3, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
-
-				if (lte.setSSL(3, 3) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API AtmoSud");
-				}
-			}
-
-			if (lte.setPort(3, loggerConfigs[LoggerCustom2].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 3: ");
-				Debug.println(loggerConfigs[LoggerCustom2].destport);
-			}
-
-			if (cfg::nbiot_format == 0)
-			{
-				if (lte.setHeader(3, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 2/0: ");
-					Debug.println("0:Content-Type:application/json");
-				}
-			}
-
-			if (cfg::nbiot_format == 1)
-			{
-				if (lte.setHeader(3, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 3/0: ");
-					Debug.println("0:Content-Type:application/octet-stream");
-				}
-
-				String headerstr31 = "1:Sensor:nebuleair-" + esp_chipid;
-
-				if (lte.setHeader(3, headerstr31.c_str()) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 3/1: ");
-					Debug.println(headerstr31);
-				}
-				// if (lte.setHeader(3, "2:Content-Transfer-Encoding:8BIT") == LTE_SHIELD_SUCCESS)
-				// {
-				// 	Debug.print("Header 3/2: ");
-				// 	Debug.println("2:Content-Transfer-Encoding:8BIT"); //BINARY
-				// }
-			}
-		}
+	
 
 		confignbiot[0] = cfg::sds_read; //REVOIR ICI
 		confignbiot[1] = cfg::npm_read;
@@ -6810,10 +6591,10 @@ void loop()
 				sum_send_time += sendSensorCommunity(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
 			}
 
-			if (cfg::has_nbiot && !nbiot_connection_lost)
-			{
-				sum_send_time += sendSensorCommunityNBIoT(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
-			}
+			// if (cfg::has_nbiot && !nbiot_connection_lost)
+			// {
+			// 	sum_send_time += sendSensorCommunityNBIoT(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
+			// }
 		}
 		if (cfg::npm_read)
 		{
@@ -6822,10 +6603,10 @@ void loop()
 			{
 				sum_send_time += sendSensorCommunity(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
 			}
-			if (cfg::has_nbiot && !nbiot_connection_lost)
-			{
-				sum_send_time += sendSensorCommunityNBIoT(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
-			}
+			// if (cfg::has_nbiot && !nbiot_connection_lost)
+			// {
+			// 	sum_send_time += sendSensorCommunityNBIoT(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
+			// }
 		}
 
 		if (cfg::bmx280_read && (!bmx280_init_failed))
@@ -6838,10 +6619,10 @@ void loop()
 				{
 					sum_send_time += sendSensorCommunity(result, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
 				}
-				if (cfg::has_nbiot && !nbiot_connection_lost)
-				{
-					sum_send_time += sendSensorCommunityNBIoT(result, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
-				}
+				// if (cfg::has_nbiot && !nbiot_connection_lost)
+				// {
+				// 	sum_send_time += sendSensorCommunityNBIoT(result, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
+				// }
 			}
 			else
 			{
@@ -6849,10 +6630,10 @@ void loop()
 				{
 					sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
 				}
-				if (cfg::has_nbiot && !nbiot_connection_lost)
-				{
-					sum_send_time += sendSensorCommunityNBIoT(result, BME280_API_PIN, FPSTR(SENSORS_BME280), "BMP280_");
-				}
+				// if (cfg::has_nbiot && !nbiot_connection_lost)
+				// {
+				// 	sum_send_time += sendSensorCommunityNBIoT(result, BME280_API_PIN, FPSTR(SENSORS_BME280), "BMP280_");
+				// }
 			}
 			result = emptyString;
 		}

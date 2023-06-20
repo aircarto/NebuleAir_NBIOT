@@ -75,6 +75,18 @@ enum ConfigShapeId {
 	Config_user_custom2,
 	Config_pwd_custom2,
 	Config_ssl_custom2,
+	Config_host_nbiot_json,
+	Config_url_nbiot_json,
+	Config_port_nbiot_json,
+	Config_user_nbiot_json,
+	Config_pwd_nbiot_json,
+	Config_ssl_nbiot_json,
+	Config_host_nbiot_byte,
+	Config_url_nbiot_byte,
+	Config_port_nbiot_byte,
+	Config_user_nbiot_byte,
+	Config_pwd_nbiot_byte,
+	Config_ssl_nbiot_byte,
 };
 static constexpr char CFG_KEY_HAS_WIFI[] PROGMEM = "has_wifi";
 static constexpr char CFG_KEY_HAS_LORA[] PROGMEM = "has_lora";
@@ -125,6 +137,18 @@ static constexpr char CFG_KEY_PORT_CUSTOM2[] PROGMEM = "port_custom2";
 static constexpr char CFG_KEY_USER_CUSTOM2[] PROGMEM = "user_custom2";
 static constexpr char CFG_KEY_PWD_CUSTOM2[] PROGMEM = "pwd_custom2";
 static constexpr char CFG_KEY_SSL_CUSTOM2[] PROGMEM = "ssl_custom2";
+static constexpr char CFG_KEY_HOST_NBIOT_JSON[] PROGMEM = "host_nbiot_json";
+static constexpr char CFG_KEY_URL_NBIOT_JSON[] PROGMEM = "url_nbiot_json";
+static constexpr char CFG_KEY_PORT_NBIOT_JSON[] PROGMEM = "port_nbiot_json";
+static constexpr char CFG_KEY_USER_NBIOT_JSON[] PROGMEM = "user_nbiot_json";
+static constexpr char CFG_KEY_PWD_NBIOT_JSON[] PROGMEM = "pwd_nbiot_json";
+static constexpr char CFG_KEY_SSL_NBIOT_JSON[] PROGMEM = "ssl_nbiot_json";
+static constexpr char CFG_KEY_HOST_NBIOT_BYTE[] PROGMEM = "host_nbiot_byte";
+static constexpr char CFG_KEY_URL_NBIOT_BYTE[] PROGMEM = "url_nbiot_byte";
+static constexpr char CFG_KEY_PORT_NBIOT_BYTE[] PROGMEM = "port_nbiot_byte";
+static constexpr char CFG_KEY_USER_NBIOT_BYTE[] PROGMEM = "user_nbiot_byte";
+static constexpr char CFG_KEY_PWD_NBIOT_BYTE[] PROGMEM = "pwd_nbiot_byte";
+static constexpr char CFG_KEY_SSL_NBIOT_BYTE[] PROGMEM = "ssl_nbiot_byte";
 static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_WIFI, &cfg::has_wifi },
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_LORA, &cfg::has_lora },
@@ -175,4 +199,16 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_String, sizeof(cfg::user_custom2)-1, CFG_KEY_USER_CUSTOM2, cfg::user_custom2 },
 	{ Config_Type_Password, sizeof(cfg::pwd_custom2)-1, CFG_KEY_PWD_CUSTOM2, cfg::pwd_custom2 },
 	{ Config_Type_Bool, 0, CFG_KEY_SSL_CUSTOM2, &cfg::ssl_custom2 },
+	{ Config_Type_String, sizeof(cfg::host_nbiot_json)-1, CFG_KEY_HOST_NBIOT_JSON, cfg::host_nbiot_json },
+	{ Config_Type_String, sizeof(cfg::url_nbiot_json)-1, CFG_KEY_URL_NBIOT_JSON, cfg::url_nbiot_json },
+	{ Config_Type_UInt, 0, CFG_KEY_PORT_NBIOT_JSON, &cfg::port_nbiot_json },
+	{ Config_Type_String, sizeof(cfg::user_nbiot_json)-1, CFG_KEY_USER_NBIOT_JSON, cfg::user_nbiot_json },
+	{ Config_Type_Password, sizeof(cfg::pwd_nbiot_json)-1, CFG_KEY_PWD_NBIOT_JSON, cfg::pwd_nbiot_json },
+	{ Config_Type_Bool, 0, CFG_KEY_SSL_NBIOT_JSON, &cfg::ssl_nbiot_json },
+	{ Config_Type_String, sizeof(cfg::host_nbiot_byte)-1, CFG_KEY_HOST_NBIOT_BYTE, cfg::host_nbiot_byte },
+	{ Config_Type_String, sizeof(cfg::url_nbiot_byte)-1, CFG_KEY_URL_NBIOT_BYTE, cfg::url_nbiot_byte },
+	{ Config_Type_UInt, 0, CFG_KEY_PORT_NBIOT_BYTE, &cfg::port_nbiot_byte },
+	{ Config_Type_String, sizeof(cfg::user_nbiot_byte)-1, CFG_KEY_USER_NBIOT_BYTE, cfg::user_nbiot_byte },
+	{ Config_Type_Password, sizeof(cfg::pwd_nbiot_byte)-1, CFG_KEY_PWD_NBIOT_BYTE, cfg::pwd_nbiot_byte },
+	{ Config_Type_Bool, 0, CFG_KEY_SSL_NBIOT_BYTE, &cfg::ssl_nbiot_byte },
 };

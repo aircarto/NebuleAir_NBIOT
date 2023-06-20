@@ -51,6 +51,8 @@ enum LoggerEntry {
     LoggerMadavi,
     LoggerCustom,
     LoggerCustom2,
+    LoggerNBIoTJson,
+    LoggerNBIoTByte,
     LoggerCount
 };
 
@@ -89,6 +91,23 @@ static const char URL_CUSTOM2[] PROGMEM = "/data.php";
 #define PWD_CUSTOM2 ""
 #define SSL_CUSTOM2 0
 
+// API NBIoT json
+static const char HOST_NBIOT_JSON[] PROGMEM = "data.nebuleair.fr";
+static const char URL_NBIOT_JSON[] PROGMEM = "/nbiotjson.php";
+#define PORT_NBIOT_JSON 80
+#define USER_NBIOT_JSON ""
+#define PWD_NBIOT_JSON ""
+#define SSL_NBIOT_JSON 0
+
+// API NBIoT byte
+static const char HOST_NBIOT_BYTE[] PROGMEM = "data.nebuleair.fr";
+static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
+#define PORT_NBIOT_BYTE 80
+#define USER_NBIOT_BYTE ""
+#define PWD_NBIOT_BYTE ""
+#define SSL_NBIOT_BYTE 0
+
+
 #define PM_SERIAL_RX D39
 #define PM_SERIAL_TX D32 
 #define NBIOT_SERIAL_RX D36
@@ -124,11 +143,11 @@ static const char URL_CUSTOM2[] PROGMEM = "/data.php";
 // #define ENVEANO2_API_PIN X
 
 #define HAS_LED_VALUE 1
-#define LEDS_NB 64
+//#define LEDS_NB 64
 //#define LEDS_NB 1 //for monoLED
-//#define LEDS_NB 8 //for LEDline
-#define LEDS_MATRIX true 
-//#define LEDS_MATRIX false // for lEDline  
+#define LEDS_NB 8 //for LEDline
+//#define LEDS_MATRIX true 
+#define LEDS_MATRIX false // for lEDline  
 #define BRIGHTNESS 50
 #define RGPD 0
 #define GAMMA true

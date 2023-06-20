@@ -50,6 +50,18 @@ UInt		port_custom2
 String		user_custom2
 Password	pwd_custom2
 Bool		ssl_custom2
+String		host_nbiot_json
+String		url_nbiot_json
+UInt		port_nbiot_json
+String		user_nbiot_json
+Password	pwd_nbiot_json
+Bool		ssl_nbiot_json
+String		host_nbiot_byte
+String		url_nbiot_byte
+UInt		port_nbiot_byte
+String		user_nbiot_byte
+Password	pwd_nbiot_byte
+Bool		ssl_nbiot_byte
 """
 
 with open("nebuleair-cfg.h", "w") as h:

@@ -69,8 +69,8 @@ input[type=submit][form=remove]:hover{background:#d44}\
 .panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #438DBF;margin-bottom:1em;}\
 .radio{display:none}.panel{display:none}\
 .canvas{min-height:118px;background:#438DBF;margin-bottom:20px;}\
-#r8:checked~.panels>#panel8,#r7:checked~.panels>#panel7,#r6:checked~.panels>#panel6,#r5:checked~.panels>#panel5,#r4:checked~.panels>#panel4,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2,#r1:checked~.panels>#panel1{display:block}\
-#r8:checked~.tabs>#tab8,#r7:checked~.tabs>#tab7,#r6:checked~.tabs>#tab6,#r5:checked~.tabs>#tab5,#r4:checked~.tabs>#tab4,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2,#r1:checked~.tabs>#tab1{background:#438DBF;color:#fff}";
+#r9:checked~.panels>#panel9,#r8:checked~.panels>#panel8,#r7:checked~.panels>#panel7,#r6:checked~.panels>#panel6,#r5:checked~.panels>#panel5,#r4:checked~.panels>#panel4,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2,#r1:checked~.panels>#panel1{display:block}\
+#r9:checked~.tabs>#tab9,#r8:checked~.tabs>#tab8,#r7:checked~.tabs>#tab7,#r6:checked~.tabs>#tab6,#r5:checked~.tabs>#tab5,#r4:checked~.tabs>#tab4,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2,#r1:checked~.tabs>#tab1{background:#438DBF;color:#fff}";
 
 #define STATIC_PREFIX "/" INTL_LANG "_s1"
 
