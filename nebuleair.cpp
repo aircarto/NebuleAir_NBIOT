@@ -6329,7 +6329,7 @@ void setup()
 
 				String headerstr01 = "1:Sensor:nebuleair-" + esp_chipid;
 
-				if (lte.setHeader(2, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
+				if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
 				{
 					Debug.print("Header 0/1: ");
 					Debug.println(headerstr01);
