@@ -3732,10 +3732,21 @@ static int selectChannelForAp()
 
 static void wifiConfig()
 {
+
 	if (cfg::has_led_value)
 	{
+
 		if (LEDS_NB == 1)
 		{
+						for (int i = 0; i < 4; i++)
+			{
+				leds[0] = colorLED_empty;
+				FastLED.show();
+				delay(250);
+				leds[0] = colorLED_red;
+				FastLED.show();
+				delay(250);
+			}
 			leds[0] = colorLED_empty;
 			FastLED.show();
 			leds[0] = colorLED_wifi;
@@ -3745,11 +3756,29 @@ static void wifiConfig()
 		{
 			if (LEDS_MATRIX)
 			{
+				drawpicture(empty);
+				FastLED.show();
+				drawpicture(cross);
+				FastLED.show();
+				delay(3000);
+				drawpicture(empty);
+				FastLED.show();
 				drawpicture(wifi);
 				FastLED.show();
 			}
 			else
 			{
+				for (int i = 0; i < 4; i++)
+				{
+					fill_solid(leds, LEDS_NB, colorLED_empty);
+					FastLED.show();
+					delay(250);
+					fill_solid(leds, LEDS_NB, colorLED_red);
+					FastLED.show();
+					delay(250);
+				}
+				fill_solid(leds, LEDS_NB, colorLED_empty);
+				FastLED.show();
 				fill_solid(leds, LEDS_NB, colorLED_empty);
 				FastLED.show();
 				fill_solid(leds, LEDS_NB, colorLED_wifi);
@@ -6327,7 +6356,7 @@ void setup()
 					Debug.println("0:Content-Type:application/octet-stream");
 				}
 
-				String headerstr01 = "1:Sensor:nebuleair-" + esp_chipid;
+				String headerstr01 = "1:SensorID:" + esp_chipid;
 
 				if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
 				{
