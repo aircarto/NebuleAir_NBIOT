@@ -1218,7 +1218,6 @@ unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 
 unsigned long sending_time = 0;
-unsigned long last_update_attempt;
 int last_update_returncode;
 int last_sendData_returncode;
 
@@ -3217,7 +3216,8 @@ static void webserver_values()
 	if (cfg::enveano2_read)
 	{
 		const char *const sensor_name = SENSORS_ENVEANO2;
-		add_table_no2_value(FPSTR(sensor_name), FPSTR(INTL_NO2), last_value_no2);
+		add_table_no2_value(FPSTR(sensor_name), FPSTR(INTL_NO2_PPB), last_value_no2);
+		add_table_no2_value(FPSTR(sensor_name), FPSTR(INTL_NO2_UGM3), CairsensUART::ppbToPpm(CairsensUART::NO2, last_value_no2));
 		page_content += FPSTR(EMPTY_ROW);
 	}
 
@@ -4713,6 +4713,8 @@ static void fetchSensorCairsens(String &s)
 
 	if (cairsens.getNO2InstantVal(no2_val) == CairsensUART::NO_ERROR)
 	{
+		Debug.print("NO2 instant: ");
+		Debug.println(no2_val);
 		no2_sum += no2_val;
 		no2_val_count++;
 		debug_outln(String(no2_val_count), DEBUG_MAX_INFO);
@@ -4728,7 +4730,8 @@ static void fetchSensorCairsens(String &s)
 
 		if (no2_val_count >= 12)
 		{
-			last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
 			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
 		}
@@ -5361,7 +5364,7 @@ void os_getDevKey(u1_t *buf) { memcpy_P(buf, appkey_hex, 16); }
 //Initialiser avec les valeurs -1.0,-128.0 = valeurs par défaut qui doivent être filtrées
 
 uint8_t datalora[LEN_PAYLOAD_LORA] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff};
-//		    			              conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+//		    			              conf |   sds	  |	 sds      |    npm    | 	 npm  | 	npm	  |   npm	  |	npm	      |	npm	      |	 cov      |    temp   | humi|   press   |  no2
 
 //Peut-être changer l'indianess pour temp = inverser
 
@@ -6108,6 +6111,8 @@ void setup()
 		serialNO2.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, NO2_SERIAL_RX, NO2_SERIAL_TX); //OK
 		Debug.println("Envea Cairsens NO2... serialN02 9600 8N1 SoftwareSerial");
 		serialNO2.setTimeout((4 * 12 * 1000) / 9600);
+		// CairsensUART::CairsensUART(serialNO2);
+		// // CairsensUART::CairsensUART(serialNO2);
 	}
 
 	//test nbiotchip?
@@ -6216,28 +6221,28 @@ void setup()
 
 	delay(50);
 
-	starttime = millis(); // store the start time
-	last_update_attempt = time_point_device_start_ms = starttime;
+	// starttime = millis(); // store the start time
+	// time_point_device_start_ms = starttime;
 
-	if (cfg::npm_read)
-	{
-		starttime_NPM = starttime;
-	}
+	// if (cfg::npm_read)
+	// {
+	// 	starttime_NPM = starttime;
+	// }
 
-	if (cfg::sds_read)
-	{
-		starttime_SDS = starttime;
-	}
+	// if (cfg::sds_read)
+	// {
+	// 	starttime_SDS = starttime;
+	// }
 
-	if (cfg::ccs811_read)
-	{
-		starttime_CCS811 = starttime;
-	}
+	// if (cfg::ccs811_read)
+	// {
+	// 	starttime_CCS811 = starttime;
+	// }
 
-	if (cfg::enveano2_read)
-	{
-		starttime_Cairsens = starttime;
-	}
+	// if (cfg::enveano2_read)
+	// {
+	// 	starttime_Cairsens = starttime;
+	// }
 
 	if (cfg::has_nbiot)
 	{
@@ -6445,7 +6450,29 @@ void setup()
 	}
 	
 	Debug.printf("End of void setup()\n");
-	starttime_waiter = millis();
+	starttime_waiter = starttime  = millis(); // store the start time
+	time_point_device_start_ms = starttime;
+
+	if (cfg::npm_read)
+	{
+		starttime_NPM = starttime;
+	}
+
+	if (cfg::sds_read)
+	{
+		starttime_SDS = starttime;
+	}
+
+	if (cfg::ccs811_read)
+	{
+		starttime_CCS811 = starttime;
+	}
+
+	if (cfg::enveano2_read)
+	{
+		starttime_Cairsens = starttime;
+	}
+
 }
 
 void loop()
@@ -6578,7 +6605,6 @@ void loop()
 		}
 	}
 
-	//if (cfg::envean02_read && (!ccs811_init_failed))
 	if (cfg::enveano2_read)
 	{
 		if ((msSince(starttime_Cairsens) > SAMPLETIME_Cairsens_MS && no2_val_count < 11) || send_now)
