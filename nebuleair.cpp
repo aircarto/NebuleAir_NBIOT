@@ -4660,7 +4660,8 @@ static void fetchSensorCCS811(String &s)
 
 		ccs811_sum += etvoc;
 		ccs811_val_count++;
-		debug_outln(String(ccs811_val_count), DEBUG_MAX_INFO);
+		Debug.print("ccs811_val_count: ");
+		Debug.println(ccs811_val_count);
 	}
 	else if (errstat == CCS811_ERRSTAT_OK_NODATA)
 	{
@@ -4717,8 +4718,8 @@ static void fetchSensorCairsens(String &s)
 		Debug.println(no2_val);
 		no2_sum += no2_val;
 		no2_val_count++;
-		debug_outln(String(no2_val_count), DEBUG_MAX_INFO);
-	}
+		Debug.print("no2_val_count: ");
+		Debug.println(no2_val_count);	}
 	else
 	{
 		Debug.println("Could not get Cairsens NOX value");
