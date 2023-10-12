@@ -1050,76 +1050,145 @@ static void drawpicture(uint8_t img[][3])
 
 static void drawtime1()
 {
-	for (unsigned int i = 0; i < (LEDS_NB / 2); ++i)
+	// for (unsigned int i = 0; i < (LEDS_NB / 2); ++i)
+	// {
+	// 	if (i < LEDS_NB / 4)
+	// 	{
+	// 		leds[i] = colorLED_red;
+	// 	}
+
+	// 	if (i > (LEDS_NB / 4) - 1)
+	// 	{
+	// 		leds[i] = colorLED_orange;
+	// 	}
+
+	// 	FastLED.show();
+	// 	delay(160);
+	// }
+
+	for (unsigned int i = 0; i < 7; ++i)
 	{
-		if (i < LEDS_NB / 4)
-		{
-			leds[i] = colorLED_red;
-		}
-
-		if (i > (LEDS_NB / 4) - 1)
-		{
-			leds[i] = colorLED_orange;
-		}
-
-		FastLED.show();
-		delay(160);
+	drawpicture(damier1);
+	FastLED.show();
+	delay(1000);
+	drawpicture(damier2);
+	FastLED.show();
+	delay(1000);
 	}
 }
 
 static void drawtimemono1()
 {
-	leds[0] = colorLED_red;
+	// leds[0] = colorLED_red;
+	// FastLED.show();
+	// delay(7500);
+	// leds[0] = colorLED_orange;
+	// FastLED.show();
+	// delay(7500);
+
+	for (unsigned int i = 0; i < 7; ++i)
+	{
+	leds[0] = colorLED_empty;
 	FastLED.show();
-	delay(7500);
-	leds[0] = colorLED_orange;
+	delay(1000);
+	leds[0] = colorLED_start;
 	FastLED.show();
-	delay(7500);
+	delay(1000);
+	}
+
 }
 
 static void drawtimeline1()
 {
-	for (unsigned int i = 0; i < LEDS_NB; ++i)
+	// for (unsigned int i = 0; i < LEDS_NB; ++i)
+	// {
+	// 	leds[i] = colorLED_red;
+	// 	FastLED.show();
+	// 	delay(470);
+	// }
+	// for (unsigned int i = 0; i < LEDS_NB; ++i)
+	// {
+	// 	leds[i] = colorLED_orange;
+	// 	FastLED.show();
+	// 	delay(470);
+	// }
+
+ for (unsigned int i = 0; i < 7; ++i)
 	{
-		leds[i] = colorLED_red;
-		FastLED.show();
-		delay(470);
+	for (unsigned int j = 0; j < LEDS_NB; ++j)
+	{
+		if(j & 1){
+		leds[j] = colorLED_start;
+		}else{
+		leds[j] = colorLED_empty;
+		}
 	}
-	for (unsigned int i = 0; i < LEDS_NB; ++i)
+	FastLED.show();
+	delay(1000);
+
+
+	for (unsigned int k = 0; k < LEDS_NB; ++k)
 	{
-		leds[i] = colorLED_orange;
-		FastLED.show();
-		delay(470);
+		if(k & 1){
+		leds[k] = colorLED_empty;
+		}else{
+		leds[k] = colorLED_start;
+		}
+	}
+	FastLED.show();
+	delay(1000);
 	}
 }
 
 static void drawtime2()
 {
-	for (unsigned int i = LEDS_NB / 2; i < LEDS_NB; ++i)
+	// for (unsigned int i = LEDS_NB / 2; i < LEDS_NB; ++i)
+	// {
+	// 	if (i < (LEDS_NB / 4) * 3)
+	// 	{
+	// 		leds[i] = colorLED_yellow;
+	// 	}
+
+	// 	if (i > ((LEDS_NB / 4) * 3) - 1)
+	// 	{
+	// 		leds[i] = colorLED_green;
+	// 	}
+
+	// 	FastLED.show();
+	// 	delay(160);
+	// }
+
+	for (unsigned int i = 0; i < 7; ++i)
 	{
-		if (i < (LEDS_NB / 4) * 3)
-		{
-			leds[i] = colorLED_yellow;
-		}
-
-		if (i > ((LEDS_NB / 4) * 3) - 1)
-		{
-			leds[i] = colorLED_green;
-		}
-
-		FastLED.show();
-		delay(160);
+	drawpicture(damier1);
+	FastLED.show();
+	delay(1000);
+	drawpicture(damier2);
+	FastLED.show();
+	delay(1000);
 	}
+
 }
 
 static void drawtimemono2()
 {
-	leds[0] = colorLED_orange;
+	// leds[0] = colorLED_orange;
+	// FastLED.show();
+	// delay(7500);
+	// leds[0] = colorLED_green;
+	// FastLED.show();
+	// delay(7500);
+
+
+	for (unsigned int i = 0; i < 7; ++i)
+	{
+	leds[0] = colorLED_empty;
 	FastLED.show();
-	delay(7500);
-	leds[0] = colorLED_green;
+	delay(1000);
+	leds[0] = colorLED_start;
 	FastLED.show();
-	delay(7500);
+	delay(1000);
+	}
 }
 
 static void drawtimeline2()
@@ -4728,8 +4797,10 @@ static void fetchSensorCairsens(String &s)
 	{
 		last_value_no2 = -1.0f;
 
-		if (no2_val_count >= 11)
+		if (count_sends == 0){
+		if (no2_val_count >= 10)
 		{
+			Debug.print("First NO2 measurement with average on:");
 			Debug.println(no2_val_count);
 			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
 			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
@@ -4740,7 +4811,19 @@ static void fetchSensorCairsens(String &s)
 		{
 			Cairsens_error_count++;
 		}
-
+		}else{
+		if (no2_val_count >= 12)
+		{
+			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
+			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+		else
+		{
+			Cairsens_error_count++;
+		}
+		}
 		no2_sum = 0;
 		no2_val_count = 0;
 	}
@@ -6514,14 +6597,14 @@ void loop()
 					}
 					else
 					{
-						leds[0] = colorLED_empty;
-						leds[1] = colorLED_start;
-						leds[2] = colorLED_empty;
-						leds[3] = colorLED_start;
-						leds[4] = colorLED_empty;
-						leds[5] = colorLED_start;
-						leds[6] = colorLED_empty;
-						leds[7] = colorLED_start;
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							if(i & 1){
+							leds[i] = colorLED_start;
+							}else{
+							leds[i] = colorLED_empty;
+							}
+						}
 						FastLED.show();
 					}
 				}
@@ -6543,14 +6626,14 @@ void loop()
 					}
 					else
 					{
-						leds[0] = colorLED_start;
-						leds[1] = colorLED_empty;
-						leds[2] = colorLED_start;
-						leds[3] = colorLED_empty;
-						leds[4] = colorLED_start;
-						leds[5] = colorLED_empty;
-						leds[6] = colorLED_start;
-						leds[7] = colorLED_empty;
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							if(i & 1){
+							leds[i] = colorLED_empty;
+							}else{
+							leds[i] = colorLED_start;
+							}
+						}
 						FastLED.show();
 					}
 				}
