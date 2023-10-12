@@ -4729,8 +4729,9 @@ static void fetchSensorCairsens(String &s)
 	{
 		last_value_no2 = -1.0f;
 
-		if (no2_val_count >= 12)
+		if (no2_val_count >= 11)
 		{
+			Debug.println(no2_val_count);
 			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
 			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
 			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
