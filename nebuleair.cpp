@@ -52,7 +52,6 @@ String SOFTWARE_VERSION_SHORT(SOFTWARE_VERSION_STR_SHORT);
 #include <StreamString.h>
 #include "./bmx280_i2c.h"
 #include "./cairsens.h"
-#include "./configuration.h"
 
 // includes files
 #include "./intl.h"
