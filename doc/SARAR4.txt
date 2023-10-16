@@ -1,0 +1,3 @@
++ voir les +CSGT AT commande pour tester l'état prêt/pas prêt du module
+
+https://www.manualslib.com/manual/1593552/Ublox-Sara-R4-Series.html?page=30#manual
