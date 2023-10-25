@@ -1048,6 +1048,9 @@ static void drawpicture(uint8_t img[][3])
 	}
 }
 
+//TESTTTTT
+
+
 static void drawtime1()
 {
 	// for (unsigned int i = 0; i < (LEDS_NB / 2); ++i)
