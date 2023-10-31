@@ -927,6 +927,25 @@ uint8_t LTE_Shield::getOperators(struct operator_stats *opRet, int maxOps)
     return opsSeen;
 }
 
+
+LTE_Shield_error_t LTE_Shield::setModeFormat()
+{
+    LTE_Shield_error_t err;
+    char *command;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_OPERATOR_SELECTION) + 24);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s=1,2", LTE_SHIELD_OPERATOR_SELECTION);
+
+    // AT+COPS maximum response time is 3 minutes (180000 ms)
+    err = sendCommandWithResponse(command, LTE_SHIELD_RESPONSE_OK, NULL,
+                                  180000);
+
+    free(command);
+    return err;
+}
+
 LTE_Shield_error_t LTE_Shield::registerOperator(struct operator_stats oper)
 {
     LTE_Shield_error_t err;

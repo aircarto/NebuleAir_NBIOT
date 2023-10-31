@@ -3,6 +3,8 @@
 #define SSID_BASENAME "nebuleair-"
 #define HOSTNAME_BASE "nebuleair-"
 
+#define ORANGE_ID "20801"
+
 #define LEN_CFG_STRING 65
 #define LEN_CFG_PASSWORD 65
 #define LEN_CFG_STRING2 65

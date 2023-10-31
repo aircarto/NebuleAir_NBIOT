@@ -2553,10 +2553,10 @@ static void webserver_config_send_body_get(String &page_content)
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for LTE networks
-		page_content += F("<div id='ltelist'>" INTL_LTE_NETWORKS "</div><br/>");
-	}
+	// if (cfg::config_nbiot && cfg::has_nbiot)
+	// { // scan for LTE networks
+	// 	page_content += F("<div id='ltelist'>" INTL_LTE_NETWORKS "</div><br/>");
+	// }
 
 	page_content += FPSTR("\n");
 	add_form_checkbox(Config_has_nbiot, FPSTR(INTL_NBIOT_ACTIVATION));
@@ -2579,13 +2579,13 @@ static void webserver_config_send_body_get(String &page_content)
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		}
 
-		if (cfg::config_nbiot)
-		{
-			page_content += FPSTR(INTL_NBIOT_NUMBER);
-			page_content += F("<input form='secondar' type='number' name='lteid' id='lteid' maxlength='3'/>");
-			page_content += F("<form id='secondar' method='POST' action='/setlte'></form><input form='secondar' type='submit' value='" INTL_SAVE_NBIOT "'/>");
-			page_content += FPSTR("<br/>");
-		}
+		// if (cfg::config_nbiot)
+		// {
+		// 	page_content += FPSTR(INTL_NBIOT_NUMBER);
+		// 	page_content += F("<input form='secondar' type='number' name='lteid' id='lteid' maxlength='3'/>");
+		// 	page_content += F("<form id='secondar' method='POST' action='/setlte'></form><input form='secondar' type='submit' value='" INTL_SAVE_NBIOT "'/>");
+		// 	page_content += FPSTR("<br/>");
+		// }
 	}
 	else
 	{
@@ -2782,10 +2782,10 @@ static void webserver_config_send_body_get(String &page_content)
 	{ // scan for wlan ssids
 		page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 	}
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for wlan ssids
-		page_content += F("<script>window.setTimeout(load_lte_list,1000);</script>");
-	}
+	// if (cfg::config_nbiot && cfg::has_nbiot)
+	// { 
+	// 	page_content += F("<script>window.setTimeout(load_lte_list,1000);</script>");
+	// }
 	server.sendContent(page_content);
 	page_content = emptyString;
 }
@@ -2921,10 +2921,10 @@ static void webserver_config()
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
 
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for wlan ssids
-		page_content += FPSTR(LTE_CONFIG_SCRIPT);
-	}
+	// if (cfg::config_nbiot && cfg::has_nbiot)
+	// { // scan for wlan ssids
+	// 	page_content += FPSTR(LTE_CONFIG_SCRIPT);
+	// }
 
 	if (server.method() == HTTP_GET)
 	{
@@ -6297,6 +6297,72 @@ void setup()
 			Debug.println("LTE Shield connected!");
 			Debug.println("Sparkfun SARA-R4 NBIoT... serialNBIOT 9600 8N1");
 			nbiot_connection_lost = false;
+
+			//ON AJOUTE ICI
+
+		if (lte.setModeFormat() == LTE_SHIELD_SUCCESS)
+		{
+		if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+		{
+			if(currentOperator = ORANGE_ID){
+			Debug.print("Already connected to Orange with ID:");
+			Debug.println(currentOperator);
+			}else{
+				if (lte.registerOperator(ORANGE_ID) == LTE_SHIELD_SUCCESS)
+				{
+					Serial.println("Network Orange registered\r\n");
+				}
+				else
+				{
+					Serial.println(F("Error connecting to operator. Reset and try again, or try another network."));
+					cfg::has_nbiot = false;
+				}
+			}
+		}
+		else
+		{
+			Debug.print("Not connected!");
+
+				// Set MNO to either Verizon, T-Mobile, AT&T, Telstra, etc.
+		// This will narrow the operator options during our scan later
+		Debug.println("Setting mobile-network operator");
+		if (lte.setNetwork(MOBILE_NETWORK_OPERATOR))
+		{
+			Debug.print("Set mobile network operator to ");
+			Debug.println(MOBILE_NETWORK_STRINGS[MOBILE_NETWORK_OPERATOR]);
+		}
+		else
+		{
+			Debug.println("Error setting MNO. Try cycling power to the shield/Arduino.");
+			cfg::has_nbiot = false; //deactivate
+		}
+
+		Debug.println("Setting APN...");
+		if (lte.setAPN(cfg::apn) == LTE_SHIELD_SUCCESS)  //ON LAISSE HOLOGRAM
+		{
+			Debug.println("APN successfully set.\r\n");
+		}
+		else
+		{
+			Debug.println("Error setting APN. Try cycling power to the shield/Arduino.");
+			cfg::has_nbiot = false;
+		}
+
+		if (lte.registerOperator(ORANGE_ID) == LTE_SHIELD_SUCCESS)
+				{
+					Serial.println("Network Orange registered\r\n");
+				}
+				else
+				{
+					Serial.println(F("Error connecting to operator. Reset and try again, or try another network."));
+					cfg::has_nbiot = false;
+				}
+
+		}
+		}else{
+			Debug.print("Can't set right format!");
+			cfg::has_nbiot = false;
+		}
 		}
 		else
 		{

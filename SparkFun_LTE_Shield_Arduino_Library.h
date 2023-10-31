@@ -214,6 +214,7 @@ public:
                                 unsigned long dialNumber = 99, LTE_Shield_l2p_t l2p = L2P_DEFAULT);
 
     uint8_t getOperators(struct operator_stats *op, int maxOps = 3);
+    LTE_Shield_error_t setModeFormat();
     LTE_Shield_error_t registerOperator(struct operator_stats oper);
     LTE_Shield_error_t getOperator(String *oper);
     LTE_Shield_error_t deregisterOperator(void);
