@@ -1048,9 +1048,6 @@ static void drawpicture(uint8_t img[][3])
 	}
 }
 
-//TESTTTTT
-
-
 static void drawtime1()
 {
 	// for (unsigned int i = 0; i < (LEDS_NB / 2); ++i)
@@ -6813,6 +6810,7 @@ void loop()
 		if (cfg::has_wifi)
 		{
 			add_Value2Json(data, F("signal_wifi"), String(last_signal_strength_wifi));
+			add_Value2Json(data, F("local_IP"), WiFi.localIP().toString());
 		}
 
 		if (cfg::has_nbiot)
