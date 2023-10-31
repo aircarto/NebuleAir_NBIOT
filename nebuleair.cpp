@@ -106,7 +106,8 @@ namespace cfg
 	bool enveano2_read = ENVEANO2_READ;
 
 	// Location
-
+	char latitude[LEN_GEOCOORDINATES];
+	char longitude[LEN_GEOCOORDINATES];
 	char height_above_sealevel[8] = "0";
 
 	// send to "APIs"
@@ -178,6 +179,8 @@ namespace cfg
 		strcpy_P(url_nbiot_json, URL_NBIOT_JSON);
 		strcpy_P(host_nbiot_byte, HOST_NBIOT_BYTE);
 		strcpy_P(url_nbiot_byte, URL_NBIOT_BYTE);
+		strcpy_P(latitude, LATITUDE);
+		strcpy_P(longitude, LONGITUDE);
 
 		if (!*fs_ssid)
 		{
@@ -1210,6 +1213,16 @@ static void drawtimeline2()
 unsigned int multiplier = 1;
 bool LEDwait = false;
 unsigned long starttime_waiter;
+
+/*****************************************************************
+ * GPS coordinates                                              *
+ *****************************************************************/
+
+struct gps
+{
+	String latitude;
+	String longitude;
+};
 
 /*****************************************************************
  * Serial declarations                                           *
@@ -2597,6 +2610,8 @@ static void webserver_config_send_body_get(String &page_content)
 
 	page_content += F("<b>" INTL_LOCATION "</b>&nbsp;");
 	page_content += FPSTR(TABLE_TAG_OPEN);
+	add_form_input(page_content, Config_latitude, FPSTR(INTL_LATITUDE), LEN_GEOCOORDINATES - 1);
+	add_form_input(page_content, Config_longitude, FPSTR(INTL_LONGITUDE), LEN_GEOCOORDINATES - 1);
 	add_form_input(page_content, Config_height_above_sealevel, FPSTR(INTL_HEIGHT_ABOVE_SEALEVEL), LEN_HEIGHT_ABOVE_SEALEVEL - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
@@ -3981,6 +3996,65 @@ static void waitForWifiToConnect(int maxRetries)
 }
 
 /*****************************************************************
+ * get GPS from AirCarto                                       *
+ *****************************************************************/
+
+String latitude_aircarto = "0.00000";
+String longitude_aircarto = "0.00000";
+
+gps getGPS(String id)
+{
+	String reponseAPI;
+	StaticJsonDocument<JSON_BUFFER_SIZE2> json;
+	char reponseJSON[JSON_BUFFER_SIZE2];
+
+	gps coordinates{"0.00000", "0.00000"};
+
+	HTTPClient http;
+	http.setTimeout(20 * 1000);
+
+	String urlAirCarto = "http://data.moduleair.fr/get_loc.php?id=";
+	String serverPath = urlAirCarto + id;
+
+	debug_outln_info(F("Call: "), serverPath);
+	http.begin(serverPath.c_str());
+
+	int httpResponseCode = http.GET();
+
+	if (httpResponseCode > 0)
+	{
+		reponseAPI = http.getString();
+		if (reponseAPI == "null")
+		{
+			return {"0.00000", "0.00000"};
+		}
+
+		debug_outln_info(F("Response: "), reponseAPI);
+		strcpy(reponseJSON, reponseAPI.c_str());
+
+		DeserializationError error = deserializeJson(json, reponseJSON);
+
+		if (strcmp(error.c_str(), "Ok") == 0)
+		{
+			return {json["latitude"], json["longitude"]};
+		}
+		else
+		{
+			Debug.print(F("deserializeJson() failed: "));
+			Debug.println(error.c_str());
+			return {"0.00000", "0.00000"};
+		}
+		http.end();
+	}
+	else
+	{
+		debug_outln_info(F("Failed connecting to AirCarto with error code:"), String(httpResponseCode));
+		return {"0.00000", "0.00000"};
+		http.end();
+	}
+}
+
+/*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
 
@@ -4099,6 +4173,18 @@ static void connectWifi()
 		}
 
 		wifi_connection_lost = false;
+		Debug.println("Get coordinates..."); //only once!
+		gps coordinates = getGPS(esp_chipid);
+		latitude_aircarto = coordinates.latitude;
+		longitude_aircarto = coordinates.longitude;
+
+		Debug.println(coordinates.latitude);
+		Debug.println(coordinates.longitude);
+		if (coordinates.latitude != "0.00000" && coordinates.latitude != "0.00000")
+		{
+			strcpy_P(cfg::latitude, latitude_aircarto.c_str()); //replace the values in the firmware but not in the SPIFFS
+			strcpy_P(cfg::longitude, longitude_aircarto.c_str());
+		}
 	}
 
 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
@@ -6811,6 +6897,8 @@ void loop()
 		{
 			add_Value2Json(data, F("signal_wifi"), String(last_signal_strength_wifi));
 			add_Value2Json(data, F("local_IP"), WiFi.localIP().toString());
+			add_Value2Json(data, F("latitude"), String(cfg::latitude));
+			add_Value2Json(data, F("longitude"), String(cfg::longitude));
 		}
 
 		if (cfg::has_nbiot)

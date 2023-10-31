@@ -157,3 +157,8 @@ static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
 #define DEBUG 5
 
 static const char URL_API_SENSORCOMMUNITY[] PROGMEM = "https://data.sensor.community/airrohr/v1/sensor/";
+
+//Location
+
+const char LATITUDE[] PROGMEM = "43.296";
+const char LONGITUDE[] PROGMEM = "5.369";

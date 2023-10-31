@@ -23,6 +23,8 @@ Bool		npm_read
 Bool		bmx280_read
 String		height_above_sealevel
 Bool		ccs811_read
+String		latitude
+String		longitude
 Bool		enveano2_read
 Bool		send2dusti
 Bool		ssl_dusti
