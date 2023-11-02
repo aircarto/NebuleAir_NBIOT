@@ -142,7 +142,7 @@ static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
 #define ENVEANO2_READ 0
 // #define ENVEANO2_API_PIN X
 
-#define HAS_LED_VALUE 1
+#define HAS_LED_VALUE 0
 //#define LEDS_NB 64
 //#define LEDS_NB 1 //for monoLED
 #define LEDS_NB 8 //for LEDline

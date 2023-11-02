@@ -40,8 +40,8 @@
 
 #include <IPAddress.h>
 
-#define LTE_SHIELD_POWER_PIN 25  //5  //il faudra gerer la conversion IOREF de 5 V => 1.8 V pourutiliser des pins supplémentaires
-#define LTE_SHIELD_RESET_PIN 33   //6
+#define LTE_SHIELD_POWER_PIN 4  //5  //il faudra gerer la conversion IOREF de 5 V => 1.8 V pourutiliser des pins supplémentaires
+#define LTE_SHIELD_RESET_PIN -1    //6 //13
 
 typedef enum
 {

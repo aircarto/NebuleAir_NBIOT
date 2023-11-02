@@ -2783,7 +2783,7 @@ static void webserver_config_send_body_get(String &page_content)
 		page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 	}
 	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for wlan ssids
+	{ 
 		page_content += F("<script>window.setTimeout(load_lte_list,1000);</script>");
 	}
 	server.sendContent(page_content);
@@ -3038,7 +3038,7 @@ static void webserver_lte()
 	}
 	else
 	{
-		Debug.print("Not connected!");
+		Debug.println("Not connected!");
 	}
 
 	if (newConnection)
@@ -3133,20 +3133,20 @@ static void webserver_setlte()
 		{
 			if ((server.arg("lteid").toInt() >= 0) && (server.arg("lteid").toInt() <= opsAvailable))
 			{
-				Serial.println("Connecting to option " + server.arg("lteid"));
+				Debug.println("Connecting to option " + server.arg("lteid"));
 				if (lte.registerOperator(ops[server.arg("lteid").toInt()]) == LTE_SHIELD_SUCCESS)
 				{
-					Serial.println("Network " + ops[server.arg("lteid").toInt()].longOp + " registered\r\n");
+					Debug.println("Network " + ops[server.arg("lteid").toInt()].longOp + " registered\r\n");
 				}
 				else
 				{
-					Serial.println(F("Error connecting to operator. Reset and try again, or try another network."));
+					Debug.println(F("Error connecting to operator. Reset and try again, or try another network."));
 				}
 			}
 		}
 		else
 		{
-			Serial.println(F("Did not find an operator. Double-check SIM and antenna, reset and try again, or try another network."));
+			Debug.println(F("Did not find an operator. Double-check SIM and antenna, reset and try again, or try another network."));
 			cfg::has_nbiot = false;
 		}
 		cfg::config_nbiot = false;
@@ -4013,7 +4013,7 @@ gps getGPS(String id)
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
 
-	String urlAirCarto = "http://data.moduleair.fr/get_loc.php?id=";
+	String urlAirCarto = "http://data.nebuleair.fr/get_loc.php?id=";
 	String serverPath = urlAirCarto + id;
 
 	debug_outln_info(F("Call: "), serverPath);
@@ -6287,6 +6287,17 @@ void setup()
 
 	//test nbiotchip?
 
+		if (cfg::has_wifi)
+	{
+		setupNetworkTime();
+		connectWifi();
+		setup_webserver();
+	}
+	else
+	{
+		wifiConfig();
+	}
+
 	if (cfg::has_nbiot)
 	{
 		//serialNBIOT.setTimeout(5000); //to test ?
@@ -6297,6 +6308,9 @@ void setup()
 			Debug.println("LTE Shield connected!");
 			Debug.println("Sparkfun SARA-R4 NBIoT... serialNBIOT 9600 8N1");
 			nbiot_connection_lost = false;
+
+			//ON AJOUTE ICI
+
 		}
 		else
 		{
@@ -6373,17 +6387,6 @@ void setup()
 	}
 
 	debug_outln_info(F("\nChipId: "), esp_chipid);
-
-	if (cfg::has_wifi)
-	{
-		setupNetworkTime();
-		connectWifi();
-		setup_webserver();
-	}
-	else
-	{
-		wifiConfig();
-	}
 
 	createLoggerConfigs();
 	logEnabledAPIs();
