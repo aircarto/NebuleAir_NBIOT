@@ -15,6 +15,7 @@ constexpr unsigned SMALL_STR = 64-1;
 constexpr unsigned MED_STR = 256-1;
 constexpr unsigned LARGE_STR = 512-1;
 constexpr unsigned XLARGE_STR = 1024-1;
+//constexpr unsigned XLARGE_STR = 1500-1;
 
 //Answers Next PM
 const uint8_t constexpr answer_stop[4] = {0x81, 0x15, 0x01, 0x69};

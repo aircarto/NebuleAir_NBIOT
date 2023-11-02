@@ -7,7 +7,7 @@ const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
 const char INTL_NO_WIFI_NETWORKS[] PROGMEM =  "Pas de réseau wifi";
 const char INTL_NO_LTE_NETWORKS[] PROGMEM =  "Pas de réseau LTE";
 const char INTL_LTE_NETWORK_FOUND[] PROGMEM =  "Platine configurée pour: ";
-const char INTL_LTE_NETWORK_NOT_FOUND[] PROGMEM =  "Platine non configurée";
+const char INTL_LTE_NETWORK_NOT_FOUND[] PROGMEM =  "Opérateur non configuré";
 const char INTL_NBIOT_MUST_ACTIVATE[] PROGMEM =  "Activer le NBIoT si besoin";
 #define INTL_SAVE_NBIOT "Sauvegarder le réseau"
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Réseaux détectés: ";

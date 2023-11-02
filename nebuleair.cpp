@@ -1252,6 +1252,7 @@ const String MOBILE_NETWORK_STRINGS[] = {"Default", "SIM_ICCD", "AT&T", "VERIZON
 LTE_Shield lte;
 struct operator_stats ops[MAX_OPERATORS];
 String currentOperator = "";
+bool operator_found = false;
 int opsAvailable;
 String currentApn = "";
 IPAddress ip(0, 0, 0, 0);
@@ -2462,7 +2463,12 @@ static void webserver_config_send_body_get(String &page_content)
 					  "<input form='main' class='radio' id='r9' name='group' type='radio'>"
 					  "<div class='tabs'>"
 					  "<label class='tab' id='tab1' for='r1'>");
-	page_content += FPSTR(INTL_WIFI_SETTINGS);
+
+	Debug.println(page_content.length());
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	page_content = FPSTR(INTL_WIFI_SETTINGS);
 	page_content += F("</label>"
 					  "<label class='tab' id='tab2' for='r2'>");
 	page_content += FPSTR(INTL_LORA_SETTINGS);
@@ -2496,11 +2502,7 @@ static void webserver_config_send_body_get(String &page_content)
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
 
-	server.sendContent(page_content);
-	page_content = emptyString;
-	// Debug.println("avant WIFI");
 	add_form_checkbox(Config_has_wifi, FPSTR(INTL_WIFI_ACTIVATION));
-	// Debug.println("après WIFI");
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID - 1);
 	add_form_input(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
@@ -2510,11 +2512,6 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 	page_content += FPSTR(WEB_B_BR);
 	page_content += FPSTR(BR_TAG);
-
-	// Paginate page after ~ 1500 Bytes
-	// server.sendContent(page_content);
-	// page_content = emptyString;
-
 	add_form_checkbox(Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME - 1);
@@ -2523,7 +2520,9 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
 
 	if (!wificonfig_loop)
 	{
@@ -2534,10 +2533,11 @@ static void webserver_config_send_body_get(String &page_content)
 		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID - 1);
 		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-
-		// Paginate page after ~ 1500 Bytes
-		server.sendContent(page_content);
 	}
+			// Paginate page after ~ 1500 Bytes
+	Debug.println(page_content.length());
+	server.sendContent(page_content);
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(2));
 	page_content += FPSTR(WEB_LF_B);
@@ -2549,7 +2549,11 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_deveui, FPSTR("DEVEUI"), LEN_DEVEUI - 1);
 	add_form_input(page_content, Config_appkey, FPSTR("APPKEY"), LEN_APPKEY - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+			// Paginate page after ~ 1500 Bytes
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 
@@ -2564,7 +2568,7 @@ static void webserver_config_send_body_get(String &page_content)
 
 	if (cfg::has_nbiot)
 	{
-		if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+		if (operator_found)
 		{
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
@@ -2589,8 +2593,6 @@ static void webserver_config_send_body_get(String &page_content)
 	}
 	else
 	{
-		// page_content += FPSTR(INTL_NBIOT_MUST_ACTIVATE);
-		// page_content += FPSTR("<br/>");
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2604,7 +2606,10 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox(Config_config_nbiot, FPSTR(INTL_NBIOT_CONFIGURATION));
 	page_content += FPSTR("<br/>");
 	add_radio_input(page_content, Config_nbiot_format, FPSTR(INTL_NBIOT_DATA_FORMAT));
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
 
@@ -2614,13 +2619,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_longitude, FPSTR(INTL_LONGITUDE), LEN_GEOCOORDINATES - 1);
 	add_form_input(page_content, Config_height_above_sealevel, FPSTR(INTL_HEIGHT_ABOVE_SEALEVEL), LEN_HEIGHT_ABOVE_SEALEVEL - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-
-	// Paginate page after ~ 1500 Bytes
-
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 
 	page_content += FPSTR(TABLE_TAG_OPEN);
@@ -2633,7 +2632,9 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_time_for_wifi_config, FPSTR(INTL_DURATION_ROUTER_MODE), 5);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(5));
 
@@ -2642,11 +2643,6 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox_sensor(Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
-	// add_form_checkbox_sensor(Config_npm_fulltime, FPSTR(INTL_NPM_FULLTIME));
-
-	// Paginate page after ~ 1500 Bytes  //ATTENTION RYTHME PAGINATION !
-	server.sendContent(page_content);
-	page_content = emptyString;
 
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_THP_SENSORS);
@@ -2654,19 +2650,11 @@ static void webserver_config_send_body_get(String &page_content)
 
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
 
-	// // Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_VOC_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 
 	add_form_checkbox_sensor(Config_ccs811_read, FPSTR(INTL_CCS811));
-
-	// Paginate page after ~ 1500 Bytes
-	//server.sendContent(page_content);
-	//page_content = emptyString;
 
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_NO2_SENSORS);
@@ -2674,9 +2662,9 @@ static void webserver_config_send_body_get(String &page_content)
 
 	add_form_checkbox_sensor(Config_enveano2_read, FPSTR(INTL_ENVEANO2));
 
-	// Paginate page after ~ 1500 Bytes
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
-	//page_content = emptyString;
+	page_content = emptyString;
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(6));
 
@@ -2688,6 +2676,7 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR("<br/><br/>");
 	add_radio_input(page_content, Config_value_displayed, FPSTR(INTL_VALUE_DISPLAYED));
 
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
 	page_content = emptyString;
 
@@ -2704,15 +2693,16 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
 	add_form_checkbox(Config_send2csv, FPSTR(WEB_CSV));
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	page_content += FPSTR(BR_TAG);
 	page_content += form_checkbox(Config_send2custom, FPSTR(INTL_SEND_TO_OWN_API), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_custom, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
+
 	page_content = FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_custom, FPSTR(INTL_SERVER), LEN_HOST_CUSTOM - 1);
 	add_form_input(page_content, Config_url_custom, FPSTR(INTL_PATH), LEN_URL_CUSTOM - 1);
@@ -2720,13 +2710,16 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_user_custom, FPSTR(INTL_USER), LEN_USER_CUSTOM - 1);
 	add_form_input(page_content, Config_pwd_custom, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	//server.sendContent(page_content);
 	page_content += FPSTR(BR_TAG);
 	page_content += form_checkbox(Config_send2custom2, FPSTR(INTL_SEND_TO_OWN_API2), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_custom2, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
+
 	page_content = FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_custom2, FPSTR(INTL_SERVER2), LEN_HOST_CUSTOM2 - 1);
 	add_form_input(page_content, Config_url_custom2, FPSTR(INTL_PATH2), LEN_URL_CUSTOM2 - 1);
@@ -2734,6 +2727,8 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_user_custom2, FPSTR(INTL_USER2), LEN_USER_CUSTOM2 - 1);
 	add_form_input(page_content, Config_pwd_custom2, FPSTR(INTL_PASSWORD2), LEN_CFG_PASSWORD2 - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
 	page_content = emptyString;
 
@@ -2744,8 +2739,8 @@ static void webserver_config_send_body_get(String &page_content)
 	// page_content += form_checkbox(Config_ssl_nbiot_json, FPSTR(WEB_HTTPS), false);
 	// page_content += FPSTR(WEB_BRACE_BR);
 	page_content += FPSTR("<br/><br/>");
-	server.sendContent(page_content);
-	page_content = FPSTR(TABLE_TAG_OPEN);
+	// server.sendContent(page_content);
+	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_nbiot_json, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_JSON - 1);
 	add_form_input(page_content, Config_url_nbiot_json, FPSTR(INTL_PATH), LEN_URL_NBIOT_JSON - 1);
 	add_form_input(page_content, Config_port_nbiot_json, FPSTR(INTL_PORT), MAX_PORT_DIGITS_NBIOT_JSON);
@@ -2759,7 +2754,11 @@ static void webserver_config_send_body_get(String &page_content)
 	// page_content += form_checkbox(Config_ssl_nbiot_byte, FPSTR(WEB_HTTPS), false);
 	// page_content += FPSTR(WEB_BRACE_BR);
 	page_content += FPSTR("<br/><br/>");
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
+	page_content = emptyString;
+
 	page_content = FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_host_nbiot_byte, FPSTR(INTL_SERVER), LEN_HOST_NBIOT_BYTE - 1);
 	add_form_input(page_content, Config_url_nbiot_byte, FPSTR(INTL_PATH), LEN_URL_NBIOT_BYTE - 1);
@@ -2767,6 +2766,8 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_user_nbiot_byte, FPSTR(INTL_USER), LEN_USER_NBIOT_BYTE - 1);
 	add_form_input(page_content, Config_pwd_nbiot_byte, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
 	page_content = emptyString;
 
@@ -2786,6 +2787,7 @@ static void webserver_config_send_body_get(String &page_content)
 	{ 
 		page_content += F("<script>window.setTimeout(load_lte_list,1000);</script>");
 	}
+	Debug.println(page_content.length());
 	server.sendContent(page_content);
 	page_content = emptyString;
 }
@@ -2922,7 +2924,7 @@ static void webserver_config()
 	}
 
 	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for wlan ssids
+	{ 
 		page_content += FPSTR(LTE_CONFIG_SCRIPT);
 	}
 
@@ -3038,7 +3040,7 @@ static void webserver_lte()
 	}
 	else
 	{
-		Debug.println("Not connected!");
+		Debug.println("Not connected to operator!");
 	}
 
 	if (newConnection)
@@ -6287,17 +6289,6 @@ void setup()
 
 	//test nbiotchip?
 
-		if (cfg::has_wifi)
-	{
-		setupNetworkTime();
-		connectWifi();
-		setup_webserver();
-	}
-	else
-	{
-		wifiConfig();
-	}
-
 	if (cfg::has_nbiot)
 	{
 		//serialNBIOT.setTimeout(5000); //to test ?
@@ -6309,15 +6300,175 @@ void setup()
 			Debug.println("Sparkfun SARA-R4 NBIoT... serialNBIOT 9600 8N1");
 			nbiot_connection_lost = false;
 
-			//ON AJOUTE ICI
 
-		}
-		else
-		{
+        Debug.println(F("NBIoT connection info:"));
+        // APN Connection info: APN name and IP
+        if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
+        {
+            Debug.println("APN: " + String(currentApn));
+            Debug.print("IP: ");
+            Debug.println(ip);
+        }else{
+            Debug.println("APN not found!");
+        }
+
+        // Operator name or number
+        if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+        {
+            Debug.print("Operator: ");
+            Debug.println(currentOperator);
+            operator_found = true;
+        }else{
+            Debug.println("Not connected to operator!");
+            operator_found = false;
+        }
+
+        // Received signal strength
+        Debug.println("RSSI: " + String(lte.rssi()));
+        Debug.println();
+
+        if (cfg::nbiot_format == 0)
+        {
+            Debug.println("Set profile API Aircarto");
+
+            if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Host 0: ");
+                Debug.println(cfg::host_nbiot_json);
+            }
+
+            if (cfg::ssl_nbiot_json)
+            {
+
+                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("CA AirCarto set up!");
+                }
+
+                if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 1");
+                }
+
+                if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 2");
+                }
+
+                if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("SSL API AirCarto");
+                }
+            }
+            
+            if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Port 0: ");
+                Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
+            }
+
+            if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Header 0/0: ");
+                Debug.println("0:Content-Type:application/json");
+            }
+
+        }
+
+        if (cfg::nbiot_format == 1)
+        {
+            Debug.println("Set profile API Aircarto");
+
+            if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Host 0: ");
+                Debug.println(cfg::host_nbiot_byte);
+            }
+
+            if (cfg::ssl_nbiot_byte)
+            {
+
+                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("CA AirCarto set up!");
+                }
+
+                if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 1");
+                }
+
+                if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 2");
+                }
+
+                if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("SSL API AirCarto");
+                }
+            }
+            
+            if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Port 0: ");
+                Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
+            }
+
+                if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.print("Header 0/0: ");
+                    Debug.println("0:Content-Type:application/octet-stream");
+                }
+
+                String headerstr01 = "1:SensorID:" + esp_chipid;
+
+                if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.print("Header 0/1: ");
+                    Debug.println(headerstr01);
+                }
+        }
+    
+
+        confignbiot[0] = cfg::sds_read; //REVOIR ICI
+        confignbiot[1] = cfg::npm_read;
+        confignbiot[2] = cfg::bmx280_read;
+        confignbiot[3] = cfg::ccs811_read;
+        confignbiot[4] = cfg::enveano2_read;
+        confignbiot[5] = cfg::rgpd;
+        confignbiot[6] = cfg::has_lora;
+        confignbiot[7] = cfg::has_wifi;
+        //si connection manquée => false
+
+        Debug.print("Configuration:");
+        Debug.println(booltobyte(confignbiot));
+        datanbiot[0] = booltobyte(confignbiot);
+
+		}else{
 			Debug.println("Unable to initialize the shield.");
 			cfg::has_nbiot = false;
 		}
 	}
+
+	if (cfg::has_wifi)
+	{
+		setupNetworkTime();
+		connectWifi();
+		setup_webserver();
+	}
+	else
+	{
+		wifiConfig();
+	}
+
+	createLoggerConfigs();
+	logEnabledAPIs();
+	powerOnTestSensors();
+
+	delay(50);
+
+
 
 	if (cfg::has_led_value)
 	{
@@ -6388,176 +6539,149 @@ void setup()
 
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
-	createLoggerConfigs();
-	logEnabledAPIs();
-	powerOnTestSensors();
 
-	delay(50);
 
-	// starttime = millis(); // store the start time
-	// time_point_device_start_ms = starttime;
-
-	// if (cfg::npm_read)
+	// if (cfg::has_nbiot)
 	// {
-	// 	starttime_NPM = starttime;
-	// }
 
-	// if (cfg::sds_read)
-	// {
-	// 	starttime_SDS = starttime;
-	// }
+	// 	Debug.println(F("NBIoT connection info:"));
+	// 	// APN Connection info: APN name and IP
+	// 	if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
+	// 	{
+	// 		Debug.println("APN: " + String(currentApn));
+	// 		Debug.print("IP: ");
+	// 		Debug.println(ip);
+	// 	}
 
-	// if (cfg::ccs811_read)
-	// {
-	// 	starttime_CCS811 = starttime;
-	// }
+	// 	// Operator name or number
+	// 	if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+	// 	{
+	// 		Debug.print("Operator: ");
+	// 		Debug.println(currentOperator);
+	// 	}
 
-	// if (cfg::enveano2_read)
-	// {
-	// 	starttime_Cairsens = starttime;
-	// }
+	// 	// Received signal strength
+	// 	Debug.println("RSSI: " + String(lte.rssi()));
+	// 	Debug.println();
 
-	if (cfg::has_nbiot)
-	{
+	// 	if (cfg::nbiot_format == 0)
+	// 	{
+	// 		Debug.println("Set profile API Aircarto");
 
-		Debug.println(F("NBIoT connection info:"));
-		// APN Connection info: APN name and IP
-		if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.println("APN: " + String(currentApn));
-			Debug.print("IP: ");
-			Debug.println(ip);
-		}
+	// 		if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Host 0: ");
+	// 			Debug.println(cfg::host_nbiot_json);
+	// 		}
 
-		// Operator name or number
-		if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.print("Operator: ");
-			Debug.println(currentOperator);
-		}
+	// 		if (cfg::ssl_nbiot_json)
+	// 		{
 
-		// Received signal strength
-		Debug.println("RSSI: " + String(lte.rssi()));
-		Debug.println();
+	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("CA AirCarto set up!");
+	// 			}
 
-		if (cfg::nbiot_format == 0)
-		{
-			Debug.println("Set profile API Aircarto");
+	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 1");
+	// 			}
 
-			if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 0: ");
-				Debug.println(cfg::host_nbiot_json);
-			}
+	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 2");
+	// 			}
 
-			if (cfg::ssl_nbiot_json)
-			{
-
-				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA AirCarto set up!");
-				}
-
-				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
-
-				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
-
-				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API AirCarto");
-				}
-			}
+	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("SSL API AirCarto");
+	// 			}
+	// 		}
 			
-			if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 0: ");
-				Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
-			}
+	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Port 0: ");
+	// 			Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
+	// 		}
 
-			if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 0/0: ");
-				Debug.println("0:Content-Type:application/json");
-			}
+	// 		if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Header 0/0: ");
+	// 			Debug.println("0:Content-Type:application/json");
+	// 		}
 
-		}
+	// 	}
 
-		if (cfg::nbiot_format == 1)
-		{
-			Debug.println("Set profile API Aircarto");
+	// 	if (cfg::nbiot_format == 1)
+	// 	{
+	// 		Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 0: ");
-				Debug.println(cfg::host_nbiot_byte);
-			}
+	// 		if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Host 0: ");
+	// 			Debug.println(cfg::host_nbiot_byte);
+	// 		}
 
-			if (cfg::ssl_nbiot_byte)
-			{
+	// 		if (cfg::ssl_nbiot_byte)
+	// 		{
 
-				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA AirCarto set up!");
-				}
+	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("CA AirCarto set up!");
+	// 			}
 
-				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
+	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 1");
+	// 			}
 
-				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
+	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 2");
+	// 			}
 
-				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API AirCarto");
-				}
-			}
+	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("SSL API AirCarto");
+	// 			}
+	// 		}
 			
-			if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 0: ");
-				Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
-			}
+	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Port 0: ");
+	// 			Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
+	// 		}
 
-				if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 0/0: ");
-					Debug.println("0:Content-Type:application/octet-stream");
-				}
+	// 			if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.print("Header 0/0: ");
+	// 				Debug.println("0:Content-Type:application/octet-stream");
+	// 			}
 
-				String headerstr01 = "1:SensorID:" + esp_chipid;
+	// 			String headerstr01 = "1:SensorID:" + esp_chipid;
 
-				if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 0/1: ");
-					Debug.println(headerstr01);
-				}
-		}
+	// 			if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.print("Header 0/1: ");
+	// 				Debug.println(headerstr01);
+	// 			}
+	// 	}
 	
 
-		confignbiot[0] = cfg::sds_read; //REVOIR ICI
-		confignbiot[1] = cfg::npm_read;
-		confignbiot[2] = cfg::bmx280_read;
-		confignbiot[3] = cfg::ccs811_read;
-		confignbiot[4] = cfg::enveano2_read;
-		confignbiot[5] = cfg::rgpd;
-		confignbiot[6] = cfg::has_lora;
-		confignbiot[7] = cfg::has_wifi;
-		//si connection manquée => false
+	// 	confignbiot[0] = cfg::sds_read; //REVOIR ICI
+	// 	confignbiot[1] = cfg::npm_read;
+	// 	confignbiot[2] = cfg::bmx280_read;
+	// 	confignbiot[3] = cfg::ccs811_read;
+	// 	confignbiot[4] = cfg::enveano2_read;
+	// 	confignbiot[5] = cfg::rgpd;
+	// 	confignbiot[6] = cfg::has_lora;
+	// 	confignbiot[7] = cfg::has_wifi;
+	// 	//si connection manquée => false
 
-		Debug.print("Configuration:");
-		Debug.println(booltobyte(confignbiot));
-		datanbiot[0] = booltobyte(confignbiot);
-	}
+	// 	Debug.print("Configuration:");
+	// 	Debug.println(booltobyte(confignbiot));
+	// 	datanbiot[0] = booltobyte(confignbiot);
+	// }
 
 	if (cfg::has_lora && lorachip)
 	{
@@ -6621,8 +6745,7 @@ void setup()
 	Debug.println(booltobyte(configlorawan));
 	datalora[0] = booltobyte(configlorawan);
 	}
-	
-	Debug.printf("End of void setup()\n");
+
 	starttime_waiter = starttime  = millis(); // store the start time
 	time_point_device_start_ms = starttime;
 
@@ -6645,6 +6768,8 @@ void setup()
 	{
 		starttime_Cairsens = starttime;
 	}
+
+	Debug.printf("End of void setup()\n");
 
 }
 
