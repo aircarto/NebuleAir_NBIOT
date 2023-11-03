@@ -6349,6 +6349,7 @@ void setup()
 				// 	}
 				// 	FastLED.show();
 				// }
+
 			for (int i = 0; i < 4; i++)
 				{
 					fill_solid(leds, LEDS_NB, colorLED_empty);
@@ -6360,7 +6361,6 @@ void setup()
 				}
 				fill_solid(leds, LEDS_NB, colorLED_empty);
 				FastLED.show();
-			}
 			}
 		}
 	}
