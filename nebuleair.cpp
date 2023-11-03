@@ -6355,7 +6355,7 @@ void setup()
 					fill_solid(leds, LEDS_NB, colorLED_empty);
 					FastLED.show();
 					delay(250);
-					fill_solid(leds, LEDS_NB, colorLED_wifi);
+					fill_solid(leds, LEDS_NB, colorLED_start);
 					FastLED.show();
 					delay(250);
 				}
