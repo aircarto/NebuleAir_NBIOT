@@ -6335,21 +6335,32 @@ void setup()
 			}
 			else
 			{
-
-				for (unsigned int i = 0; i < 3; ++i)
+				// for (unsigned int i = 0; i < 3; ++i)
+				// {
+				// 	for (unsigned int i = 0; i < LEDS_NB; ++i)
+				// 	{
+				// 		leds[i] = colorLED_start;
+				// 		FastLED.show();
+				// 		delay(200);
+				// 	}
+				// 	for (unsigned int i = 0; i < LEDS_NB; ++i)
+				// 	{
+				// 		leds[i] = colorLED_empty;
+				// 	}
+				// 	FastLED.show();
+				// }
+			for (int i = 0; i < 4; i++)
 				{
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_start;
-						FastLED.show();
-						delay(200);
-					}
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_empty;
-					}
+					fill_solid(leds, LEDS_NB, colorLED_empty);
 					FastLED.show();
+					delay(250);
+					fill_solid(leds, LEDS_NB, colorLED_wifi);
+					FastLED.show();
+					delay(250);
 				}
+				fill_solid(leds, LEDS_NB, colorLED_empty);
+				FastLED.show();
+			}
 			}
 		}
 	}
