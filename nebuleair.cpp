@@ -6287,6 +6287,73 @@ void setup()
 		// // CairsensUART::CairsensUART(serialNO2);
 	}
 
+	if (cfg::has_led_value)
+	{
+		debug_outln_info(F("init FastLED"));
+		FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, LEDS_NB); //swap R and G !  //ATTENTION AU TYPE DE LED
+		FastLED.setBrightness(cfg::brightness);				   //max=255
+
+		if (LEDS_NB == 1)
+		{
+			for (int i = 0; i < 13; i++)
+			{
+				leds[0] = colorLED_empty;
+				FastLED.show();
+				delay(200);
+				leds[0] = colorLED_start;
+				FastLED.show();
+				delay(200);
+			}
+			leds[0] = colorLED_empty;
+			FastLED.show();
+		}
+		else
+		{
+			if (LEDS_MATRIX)
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					drawpicture(empty);
+					FastLED.show();
+					delay(200);
+					drawpicture(connect1);
+					FastLED.show();
+					delay(200);
+					drawpicture(connect2);
+					FastLED.show();
+					delay(200);
+					drawpicture(connect3);
+					FastLED.show();
+					delay(200);
+					drawpicture(connect4);
+					FastLED.show();
+					delay(200);
+				}
+				drawpicture(empty);
+				FastLED.show();
+				//5 secondes
+			}
+			else
+			{
+
+				for (unsigned int i = 0; i < 3; ++i)
+				{
+					for (unsigned int i = 0; i < LEDS_NB; ++i)
+					{
+						leds[i] = colorLED_start;
+						FastLED.show();
+						delay(200);
+					}
+					for (unsigned int i = 0; i < LEDS_NB; ++i)
+					{
+						leds[i] = colorLED_empty;
+					}
+					FastLED.show();
+				}
+			}
+		}
+	}
+
 	//test nbiotchip?
 
 	if (cfg::has_nbiot)
@@ -6467,75 +6534,6 @@ void setup()
 	powerOnTestSensors();
 
 	delay(50);
-
-
-
-	if (cfg::has_led_value)
-	{
-		debug_outln_info(F("init FastLED"));
-		FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, LEDS_NB); //swap R and G !  //ATTENTION AU TYPE DE LED
-		FastLED.setBrightness(cfg::brightness);				   //max=255
-
-		if (LEDS_NB == 1)
-		{
-			for (int i = 0; i < 13; i++)
-			{
-				leds[0] = colorLED_empty;
-				FastLED.show();
-				delay(200);
-				leds[0] = colorLED_start;
-				FastLED.show();
-				delay(200);
-			}
-			leds[0] = colorLED_empty;
-			FastLED.show();
-		}
-		else
-		{
-			if (LEDS_MATRIX)
-			{
-				for (int i = 0; i < 5; i++)
-				{
-					drawpicture(empty);
-					FastLED.show();
-					delay(200);
-					drawpicture(connect1);
-					FastLED.show();
-					delay(200);
-					drawpicture(connect2);
-					FastLED.show();
-					delay(200);
-					drawpicture(connect3);
-					FastLED.show();
-					delay(200);
-					drawpicture(connect4);
-					FastLED.show();
-					delay(200);
-				}
-				drawpicture(empty);
-				FastLED.show();
-				//5 secondes
-			}
-			else
-			{
-
-				for (unsigned int i = 0; i < 3; ++i)
-				{
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_start;
-						FastLED.show();
-						delay(200);
-					}
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_empty;
-					}
-					FastLED.show();
-				}
-			}
-		}
-	}
 
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
