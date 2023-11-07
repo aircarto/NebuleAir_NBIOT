@@ -30,7 +30,7 @@ enum ConfigShapeId {
 	Config_has_lora,
 	Config_has_nbiot,
 	Config_apn,
-	Config_config_nbiot,
+	Config_operateur,
 	Config_nbiot_format,
 	Config_appeui,
 	Config_deveui,
@@ -94,7 +94,7 @@ static constexpr char CFG_KEY_HAS_WIFI[] PROGMEM = "has_wifi";
 static constexpr char CFG_KEY_HAS_LORA[] PROGMEM = "has_lora";
 static constexpr char CFG_KEY_HAS_NBIOT[] PROGMEM = "has_nbiot";
 static constexpr char CFG_KEY_APN[] PROGMEM = "apn";
-static constexpr char CFG_KEY_CONFIG_NBIOT[] PROGMEM = "config_nbiot";
+static constexpr char CFG_KEY_OPERATEUR[] PROGMEM = "operateur";
 static constexpr char CFG_KEY_NBIOT_FORMAT[] PROGMEM = "nbiot_format";
 static constexpr char CFG_KEY_APPEUI[] PROGMEM = "appeui";
 static constexpr char CFG_KEY_DEVEUI[] PROGMEM = "deveui";
@@ -158,7 +158,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_LORA, &cfg::has_lora },
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_NBIOT, &cfg::has_nbiot },
 	{ Config_Type_String, sizeof(cfg::apn)-1, CFG_KEY_APN, cfg::apn },
-	{ Config_Type_Bool, 0, CFG_KEY_CONFIG_NBIOT, &cfg::config_nbiot },
+	{ Config_Type_UInt, 0, CFG_KEY_OPERATEUR, &cfg::operateur },
 	{ Config_Type_UInt, 0, CFG_KEY_NBIOT_FORMAT, &cfg::nbiot_format },
 	{ Config_Type_Hex, sizeof(cfg::appeui)-1, CFG_KEY_APPEUI, cfg::appeui },
 	{ Config_Type_Hex, sizeof(cfg::deveui)-1, CFG_KEY_DEVEUI, cfg::deveui },

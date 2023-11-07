@@ -28,7 +28,11 @@ const char WWW_PASSWORD[] PROGMEM = "";
 // APN -- Access Point Name. Gateway between GPRS MNO
 // and another computer network. E.g. "hologram
 const char APN[] PROGMEM = "hologram";  
-#define NBIOT_FORMAT 0  // 0 = json 1 = byte
+//const unsigned int OPERATEUR = 20801; // ORANGE!!!!!
+const unsigned int OPERATEUR = 26201;
+//const unsigned int OPERATEUR = 26202;
+
+#define NBIOT_FORMAT 1  // 0 = json 1 = byte
 
 //LoRaWAN
 
@@ -142,7 +146,7 @@ static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
 #define ENVEANO2_READ 0
 // #define ENVEANO2_API_PIN X
 
-#define HAS_LED_VALUE 0
+#define HAS_LED_VALUE 1
 //#define LEDS_NB 64
 //#define LEDS_NB 1 //for monoLED
 #define LEDS_NB 8 //for LEDline

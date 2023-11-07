@@ -41,7 +41,7 @@
 #include <IPAddress.h>
 
 #define LTE_SHIELD_POWER_PIN 4  //5  //il faudra gerer la conversion IOREF de 5 V => 1.8 V pourutiliser des pins supplémentaires
-#define LTE_SHIELD_RESET_PIN -1    //6 //13
+#define LTE_SHIELD_RESET_PIN 13   //6
 
 typedef enum
 {
@@ -131,7 +131,8 @@ struct operator_stats
     uint8_t stat;
     String shortOp;
     String longOp;
-    unsigned long numOp;
+    // unsigned long numOp;
+    unsigned int numOp;
     uint8_t act;
 };
 
@@ -214,7 +215,9 @@ public:
                                 unsigned long dialNumber = 99, LTE_Shield_l2p_t l2p = L2P_DEFAULT);
 
     uint8_t getOperators(struct operator_stats *op, int maxOps = 3);
+    LTE_Shield_error_t setModeFormat(uint8_t mode = 1, uint8_t format = 2);
     LTE_Shield_error_t registerOperator(struct operator_stats oper);
+    LTE_Shield_error_t registerOperatorWithNumber(unsigned int oper);
     LTE_Shield_error_t getOperator(String *oper);
     LTE_Shield_error_t deregisterOperator(void);
 

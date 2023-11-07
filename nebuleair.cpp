@@ -87,13 +87,13 @@ namespace cfg
 
 	// NBIoT
 	char apn[LEN_APN];
+	unsigned operateur;
 	unsigned nbiot_format = NBIOT_FORMAT;
 
 	// main config
 	bool has_wifi = HAS_WIFI;
 	bool has_lora = HAS_LORA;
 	bool has_nbiot = HAS_NBIOT;
-	bool config_nbiot = CONFIG_NBIOT;
 	char appeui[LEN_APPEUI];
 	char deveui[LEN_DEVEUI];
 	char appkey[LEN_APPKEY];
@@ -167,6 +167,7 @@ namespace cfg
 		strcpy_P(deveui, DEVEUI);
 		strcpy_P(appkey, APPKEY);
 		strcpy_P(apn, APN);
+		operateur = OPERATEUR;
 		strcpy_P(www_username, WWW_USERNAME);
 		strcpy_P(www_password, WWW_PASSWORD);
 		strcpy_P(wlanssid, WLANSSID);
@@ -1071,12 +1072,12 @@ static void drawtime1()
 
 	for (unsigned int i = 0; i < 7; ++i)
 	{
-	drawpicture(damier1);
-	FastLED.show();
-	delay(1000);
-	drawpicture(damier2);
-	FastLED.show();
-	delay(1000);
+		drawpicture(damier1);
+		FastLED.show();
+		delay(1000);
+		drawpicture(damier2);
+		FastLED.show();
+		delay(1000);
 	}
 }
 
@@ -1091,14 +1092,13 @@ static void drawtimemono1()
 
 	for (unsigned int i = 0; i < 7; ++i)
 	{
-	leds[0] = colorLED_empty;
-	FastLED.show();
-	delay(1000);
-	leds[0] = colorLED_start;
-	FastLED.show();
-	delay(1000);
+		leds[0] = colorLED_empty;
+		FastLED.show();
+		delay(1000);
+		leds[0] = colorLED_start;
+		FastLED.show();
+		delay(1000);
 	}
-
 }
 
 static void drawtimeline1()
@@ -1116,30 +1116,35 @@ static void drawtimeline1()
 	// 	delay(470);
 	// }
 
- for (unsigned int i = 0; i < 7; ++i)
+	for (unsigned int i = 0; i < 7; ++i)
 	{
-	for (unsigned int j = 0; j < LEDS_NB; ++j)
-	{
-		if(j & 1){
-		leds[j] = colorLED_start;
-		}else{
-		leds[j] = colorLED_empty;
+		for (unsigned int j = 0; j < LEDS_NB; ++j)
+		{
+			if (j & 1)
+			{
+				leds[j] = colorLED_start;
+			}
+			else
+			{
+				leds[j] = colorLED_empty;
+			}
 		}
-	}
-	FastLED.show();
-	delay(1000);
+		FastLED.show();
+		delay(1000);
 
-
-	for (unsigned int k = 0; k < LEDS_NB; ++k)
-	{
-		if(k & 1){
-		leds[k] = colorLED_empty;
-		}else{
-		leds[k] = colorLED_start;
+		for (unsigned int k = 0; k < LEDS_NB; ++k)
+		{
+			if (k & 1)
+			{
+				leds[k] = colorLED_empty;
+			}
+			else
+			{
+				leds[k] = colorLED_start;
+			}
 		}
-	}
-	FastLED.show();
-	delay(1000);
+		FastLED.show();
+		delay(1000);
 	}
 }
 
@@ -1163,14 +1168,13 @@ static void drawtime2()
 
 	for (unsigned int i = 0; i < 7; ++i)
 	{
-	drawpicture(damier1);
-	FastLED.show();
-	delay(1000);
-	drawpicture(damier2);
-	FastLED.show();
-	delay(1000);
+		drawpicture(damier1);
+		FastLED.show();
+		delay(1000);
+		drawpicture(damier2);
+		FastLED.show();
+		delay(1000);
 	}
-
 }
 
 static void drawtimemono2()
@@ -1182,15 +1186,14 @@ static void drawtimemono2()
 	// FastLED.show();
 	// delay(7500);
 
-
 	for (unsigned int i = 0; i < 7; ++i)
 	{
-	leds[0] = colorLED_empty;
-	FastLED.show();
-	delay(1000);
-	leds[0] = colorLED_start;
-	FastLED.show();
-	delay(1000);
+		leds[0] = colorLED_empty;
+		FastLED.show();
+		delay(1000);
+		leds[0] = colorLED_start;
+		FastLED.show();
+		delay(1000);
 	}
 }
 
@@ -1257,7 +1260,7 @@ String currentApn = "";
 IPAddress ip(0, 0, 0, 0);
 
 uint8_t datanbiot[LEN_PAYLOAD_NBIOT] = {0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00};
-									   //conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
+//conf |   sds	|	 sds    |    npm   | 	 npm   | 	npm	   |   npm	   |	npm	   |	npm	     |	 cov    |    temp   | humi |   press   |  no2
 
 //27 valeur doit être a 0x00!!! zero terminator
 
@@ -2553,11 +2556,6 @@ static void webserver_config_send_body_get(String &page_content)
 
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for LTE networks
-		page_content += F("<div id='ltelist'>" INTL_LTE_NETWORKS "</div><br/>");
-	}
-
 	page_content += FPSTR("\n");
 	add_form_checkbox(Config_has_nbiot, FPSTR(INTL_NBIOT_ACTIVATION));
 	// page_content += FPSTR("<br/>");
@@ -2568,6 +2566,7 @@ static void webserver_config_send_body_get(String &page_content)
 		{
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
+			add_form_input(page_content, Config_operateur, FPSTR("Operateur choisi"), LEN_OPERATEUR - 1);
 			add_form_input_nbiot(page_content, FPSTR(INTL_LTE_NETWORK_FOUND), currentOperator, LEN_LTE - 1);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		}
@@ -2578,19 +2577,9 @@ static void webserver_config_send_body_get(String &page_content)
 			add_form_input_nbiot(page_content, FPSTR(INTL_LTE_NETWORK_NOT_FOUND), FPSTR(""), LEN_LTE - 1);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		}
-
-		if (cfg::config_nbiot)
-		{
-			page_content += FPSTR(INTL_NBIOT_NUMBER);
-			page_content += F("<input form='secondar' type='number' name='lteid' id='lteid' maxlength='3'/>");
-			page_content += F("<form id='secondar' method='POST' action='/setlte'></form><input form='secondar' type='submit' value='" INTL_SAVE_NBIOT "'/>");
-			page_content += FPSTR("<br/>");
-		}
 	}
 	else
 	{
-		// page_content += FPSTR(INTL_NBIOT_MUST_ACTIVATE);
-		// page_content += FPSTR("<br/>");
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_apn, FPSTR("APN"), LEN_APN - 1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2601,8 +2590,6 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR("<br/>");
 	page_content += FPSTR(INTL_NBIOT_EXPLANATION);
 	page_content += FPSTR(WEB_B_BR_BR);
-	add_form_checkbox(Config_config_nbiot, FPSTR(INTL_NBIOT_CONFIGURATION));
-	page_content += FPSTR("<br/>");
 	add_radio_input(page_content, Config_nbiot_format, FPSTR(INTL_NBIOT_DATA_FORMAT));
 	server.sendContent(page_content);
 
@@ -2782,10 +2769,6 @@ static void webserver_config_send_body_get(String &page_content)
 	{ // scan for wlan ssids
 		page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 	}
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ 
-		page_content += F("<script>window.setTimeout(load_lte_list,1000);</script>");
-	}
 	server.sendContent(page_content);
 	page_content = emptyString;
 }
@@ -2921,11 +2904,6 @@ static void webserver_config()
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
 
-	if (cfg::config_nbiot && cfg::has_nbiot)
-	{ // scan for wlan ssids
-		page_content += FPSTR(LTE_CONFIG_SCRIPT);
-	}
-
 	if (server.method() == HTTP_GET)
 	{
 		webserver_config_send_body_get(page_content);
@@ -3013,171 +2991,6 @@ static void webserver_wifi()
 		page_content += FPSTR(BR_TAG);
 	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-}
-
-/*****************************************************************
- * Webserver lte: show available LTE networks                  *
- *****************************************************************/
-
-static void webserver_lte()
-{
-	String page_content;
-
-	bool newConnection = true;
-
-	debug_outln_info(F("Initializing the LTE Shield..."));
-	debug_outln_info(F("...this may take ~25 seconds if the shield is off."));
-	debug_outln_info(F("...it may take ~5 seconds if it just turned on."));
-
-	//this function should be launched only if success in setup
-
-	if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
-	{
-		Debug.print("Already connected to: ");
-		Debug.println(currentOperator);
-	}
-	else
-	{
-		Debug.println("Not connected!");
-	}
-
-	if (newConnection)
-	{
-		// Set MNO to either Verizon, T-Mobile, AT&T, Telstra, etc.
-		// This will narrow the operator options during our scan later
-		Debug.println("Setting mobile-network operator");
-		if (lte.setNetwork(MOBILE_NETWORK_OPERATOR))
-		{
-			Debug.print("Set mobile network operator to ");
-			Debug.println(MOBILE_NETWORK_STRINGS[MOBILE_NETWORK_OPERATOR]);
-		}
-		else
-		{
-			Debug.println("Error setting MNO. Try cycling power to the shield/Arduino.");
-			cfg::has_nbiot = false; //deactivate
-		}
-
-		// Set the APN -- Access Point Name -- e.g. "hologram"
-		Debug.println("Setting APN...");
-		if (lte.setAPN(cfg::apn) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.println("APN successfully set.\r\n");
-		}
-		else
-		{
-			Debug.println("Error setting APN. Try cycling power to the shield/Arduino.");
-			cfg::has_nbiot = false;
-		}
-
-		Debug.println("Scanning for operators...this may take up to 3 minutes\r\n");
-		// lte.getOperators takes in a operator_stats struct pointer and max number of
-		// structs to scan for, then fills up those objects with operator names and numbers
-		opsAvailable = lte.getOperators(ops, MAX_OPERATORS); // This will block for up to 3 minutes
-
-		// struct operator_stats
-		// {
-		//     uint8_t stat;
-		//     String shortOp;
-		//     String longOp;
-		//     unsigned long numOp;
-		//     uint8_t act;
-		// };
-
-		if (opsAvailable == 0)
-		{
-			page_content += FPSTR(BR_TAG);
-			page_content += FPSTR(INTL_NO_LTE_NETWORKS);
-			page_content += FPSTR(BR_TAG);
-			Debug.println("Did not find an operator. Double-check SIM and antenna, reset and try again, or try another network.");
-			cfg::has_nbiot = false;
-		}
-		else
-		{
-			debug_outln_info(F("LTE networks found: "), String(opsAvailable));
-			std::unique_ptr<int[]> indices(new int[opsAvailable]);
-			debug_outln_info(F("ws: lte ..."));
-			for (unsigned i = 0; i < opsAvailable; ++i)
-			{
-				indices[i] = i;
-			}
-
-			page_content += FPSTR(INTL_NETWORKS_FOUND);
-			page_content += String(opsAvailable);
-			page_content += FPSTR(BR_TAG);
-			page_content += FPSTR(BR_TAG);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-
-			for (int i = 0; i < opsAvailable; ++i)
-			{
-				if (indices[i] == -1)
-				{
-					continue;
-				}
-				page_content += lte_to_table_row(i, ops[indices[i]].longOp, ops[indices[i]].numOp, ops[indices[i]].stat);
-			}
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(BR_TAG);
-		}
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-	}
-}
-
-static void webserver_setlte()
-{
-	if (server.hasArg("lteid"))
-	{
-		Debug.print("Network choice: ");
-		Debug.println(server.arg("lteid"));
-
-		if (opsAvailable > 0)
-		{
-			if ((server.arg("lteid").toInt() >= 0) && (server.arg("lteid").toInt() <= opsAvailable))
-			{
-				Debug.println("Connecting to option " + server.arg("lteid"));
-				if (lte.registerOperator(ops[server.arg("lteid").toInt()]) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Network " + ops[server.arg("lteid").toInt()].longOp + " registered\r\n");
-				}
-				else
-				{
-					Debug.println(F("Error connecting to operator. Reset and try again, or try another network."));
-				}
-			}
-		}
-		else
-		{
-			Debug.println(F("Did not find an operator. Double-check SIM and antenna, reset and try again, or try another network."));
-			cfg::has_nbiot = false;
-		}
-		cfg::config_nbiot = false;
-	}
-
-	//RELOAD ALL After
-
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		sendHttpRedirect();
-	}
-	else
-	{
-		if (!webserver_request_auth())
-		{
-			return;
-		}
-
-		RESERVE_STRING(page_content, XLARGE_STR);
-		start_html_page(page_content, emptyString);
-		debug_outln_info(F("ws: root ..."));
-
-		// Enable Pagination
-		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
-		page_content.replace(F("{t}"), FPSTR(INTL_CURRENT_DATA));
-		page_content.replace(F("{s}"), FPSTR(INTL_DEVICE_STATUS));
-		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
-		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
-		page_content.replace(F("{debug}"), FPSTR(INTL_DEBUG_LEVEL));
-		end_html_page(page_content);
-	}
 }
 
 /*****************************************************************
@@ -3763,7 +3576,6 @@ static void setup_webserver()
 	server.on("/", webserver_root);
 	server.on(F("/config"), webserver_config);
 	server.on(F("/wifi"), webserver_wifi);
-	server.on(F("/lte"), webserver_lte);
 	server.on(F("/values"), webserver_values);
 	server.on(F("/status"), webserver_status);
 	server.on(F("/generate_204"), webserver_config);
@@ -3772,7 +3584,6 @@ static void setup_webserver()
 	server.on(F("/serial"), webserver_serial);
 	server.on(F("/removeConfig"), webserver_removeConfig);
 	server.on(F("/reset"), webserver_reset);
-	server.on(F("/setlte"), webserver_setlte);
 	server.on(F("/data.json"), webserver_data_json);
 	server.on(F("/metrics"), webserver_metrics_endpoint);
 	server.on(F("/favicon.ico"), webserver_favicon);
@@ -3821,7 +3632,7 @@ static void wifiConfig()
 
 		if (LEDS_NB == 1)
 		{
-						for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				leds[0] = colorLED_empty;
 				FastLED.show();
@@ -3963,6 +3774,7 @@ static void wifiConfig()
 	debug_outln_info(F("---- Result Webconfig ----"));
 	debug_outln_info(F("WiFi: "), cfg::has_wifi);
 	debug_outln_info(F("LoRa: "), cfg::has_lora);
+	debug_outln_info(F("NB-IoT: "), cfg::has_nbiot);
 	debug_outln_info(F("APPEUI: "), cfg::appeui);
 	debug_outln_info(F("DEVEUI: "), cfg::deveui);
 	debug_outln_info(F("APPKEY: "), cfg::appkey);
@@ -3972,6 +3784,7 @@ static void wifiConfig()
 	debug_outln_info_bool(F("NPM: "), cfg::npm_read);
 	debug_outln_info_bool(F("BMX: "), cfg::bmx280_read);
 	debug_outln_info_bool(F("CCS811: "), cfg::ccs811_read);
+	debug_outln_info_bool(F("Cairsens: "), cfg::enveano2_read);
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("SensorCommunity: "), cfg::send2dusti);
 	debug_outln_info_bool(F("Madavi: "), cfg::send2madavi);
@@ -4525,78 +4338,90 @@ static unsigned long sendDataNBIoT(const LoggerEntry logger, const String &data,
 	return millis() - start_send;
 }
 
-
 /*****************************************************************
  * Base 64                                                   *
  *****************************************************************/
 
 constexpr char token[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    uint8_t tokenOf(char search){
-        for(uint8_t i = 0; i < 64; i++){
-            if(token[i] == search){
-                return i;
-            }
-        }
+uint8_t tokenOf(char search)
+{
+	for (uint8_t i = 0; i < 64; i++)
+	{
+		if (token[i] == search)
+		{
+			return i;
+		}
+	}
 
-        return 255;
-    }
-
-  static  void to6x4(uint8_t* input, uint8_t* output){
-        output[0] = (input[0] & 0xFC) >> 2;
-        output[1] = ((input[0] & 0x03) << 4) + ((input[1] & 0xF0) >> 4);
-        output[2] = ((input[1] & 0x0F) << 2) + ((input[2] & 0xC0) >> 6);
-        output[3] = input[2] & 0x3F;
-    }
-
-   static void to8x3(uint8_t* input, uint8_t* output){
-        output[0] = (input[0] << 2) + ((input[1] & 0x30) >> 4);
-        output[1] = ((input[1] & 0x0F) << 4) + ((input[2] & 0x3C) >> 2);
-        output[2] = ((input[2] & 0x03) << 6) + input[3];
-    }
-
-static void encode(const uint8_t* input, size_t inputLength, char* output){
-    uint8_t position = 0;
-    uint8_t bit8x3[3] = {};
-    uint8_t bit6x4[4] = {};
-
-    while(inputLength--){
-        bit8x3[position++] = *input++;
-
-        if(position == 3){
-            to6x4(bit8x3, bit6x4);
-
-            for(const auto &v: bit6x4){
-                *output++ = token[v];
-            }
-
-            position = 0;
-        }
-    }
-
-    if(position){
-        for(uint8_t i = position; i < 3; i++){
-            bit8x3[i] = 0x00;
-        }
-
-        to6x4(bit8x3, bit6x4);
-
-        for(uint8_t i = 0; i < position + 1; i++){
-            *output++ = token[bit6x4[i]];
-        }
-
-        while(position++ < 3){
-            *output++ = '=';
-        }
-    }
-
-    *output = '\0';
+	return 255;
 }
 
-static size_t encodeLength(size_t inputLength){
-    return (inputLength + 2 - ((inputLength + 2) % 3)) / 3 * 4 + 1;
+static void to6x4(uint8_t *input, uint8_t *output)
+{
+	output[0] = (input[0] & 0xFC) >> 2;
+	output[1] = ((input[0] & 0x03) << 4) + ((input[1] & 0xF0) >> 4);
+	output[2] = ((input[1] & 0x0F) << 2) + ((input[2] & 0xC0) >> 6);
+	output[3] = input[2] & 0x3F;
 }
 
+static void to8x3(uint8_t *input, uint8_t *output)
+{
+	output[0] = (input[0] << 2) + ((input[1] & 0x30) >> 4);
+	output[1] = ((input[1] & 0x0F) << 4) + ((input[2] & 0x3C) >> 2);
+	output[2] = ((input[2] & 0x03) << 6) + input[3];
+}
+
+static void encode(const uint8_t *input, size_t inputLength, char *output)
+{
+	uint8_t position = 0;
+	uint8_t bit8x3[3] = {};
+	uint8_t bit6x4[4] = {};
+
+	while (inputLength--)
+	{
+		bit8x3[position++] = *input++;
+
+		if (position == 3)
+		{
+			to6x4(bit8x3, bit6x4);
+
+			for (const auto &v : bit6x4)
+			{
+				*output++ = token[v];
+			}
+
+			position = 0;
+		}
+	}
+
+	if (position)
+	{
+		for (uint8_t i = position; i < 3; i++)
+		{
+			bit8x3[i] = 0x00;
+		}
+
+		to6x4(bit8x3, bit6x4);
+
+		for (uint8_t i = 0; i < position + 1; i++)
+		{
+			*output++ = token[bit6x4[i]];
+		}
+
+		while (position++ < 3)
+		{
+			*output++ = '=';
+		}
+	}
+
+	*output = '\0';
+}
+
+static size_t encodeLength(size_t inputLength)
+{
+	return (inputLength + 2 - ((inputLength + 2) % 3)) / 3 * 4 + 1;
+}
 
 static unsigned long sendDataNBIoTBytes(const LoggerEntry logger, const uint8_t *data, size_t size, const int pin, const char *host, const char *url, bool ssl)
 {
@@ -4873,7 +4698,8 @@ static void fetchSensorCairsens(String &s)
 		no2_sum += no2_val;
 		no2_val_count++;
 		Debug.print("no2_val_count: ");
-		Debug.println(no2_val_count);	}
+		Debug.println(no2_val_count);
+	}
 	else
 	{
 		Debug.println("Could not get Cairsens NOX value");
@@ -4883,32 +4709,35 @@ static void fetchSensorCairsens(String &s)
 	{
 		last_value_no2 = -1.0f;
 
-		if (count_sends == 0){
-		if (no2_val_count >= 10)
+		if (count_sends == 0)
 		{
-			Debug.print("First NO2 measurement with average on:");
-			Debug.println(no2_val_count);
-			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
-			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
-			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
-			debug_outln_info(FPSTR(DBG_TXT_SEP));
+			if (no2_val_count >= 10)
+			{
+				Debug.print("First NO2 measurement with average on:");
+				Debug.println(no2_val_count);
+				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+				last_value_no2 = float(no2_sum / no2_val_count); // on envoie ppb
+				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+				debug_outln_info(FPSTR(DBG_TXT_SEP));
+			}
+			else
+			{
+				Cairsens_error_count++;
+			}
 		}
 		else
 		{
-			Cairsens_error_count++;
-		}
-		}else{
-		if (no2_val_count >= 12)
-		{
-			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
-			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
-			add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
-			debug_outln_info(FPSTR(DBG_TXT_SEP));
-		}
-		else
-		{
-			Cairsens_error_count++;
-		}
+			if (no2_val_count >= 12)
+			{
+				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
+				last_value_no2 = float(no2_sum / no2_val_count); // on envoie ppb
+				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+				debug_outln_info(FPSTR(DBG_TXT_SEP));
+			}
+			else
+			{
+				Cairsens_error_count++;
+			}
 		}
 		no2_sum = 0;
 		no2_val_count = 0;
@@ -6221,7 +6050,6 @@ static void display_transmit(struct RGB displayColor)
 	drawpicture(empty);
 }
 
-
 /*****************************************************************
  * Check stack                                                    *
  *****************************************************************/
@@ -6287,17 +6115,6 @@ void setup()
 
 	//test nbiotchip?
 
-		if (cfg::has_wifi)
-	{
-		setupNetworkTime();
-		connectWifi();
-		setup_webserver();
-	}
-	else
-	{
-		wifiConfig();
-	}
-
 	if (cfg::has_nbiot)
 	{
 		//serialNBIOT.setTimeout(5000); //to test ?
@@ -6309,7 +6126,210 @@ void setup()
 			Debug.println("Sparkfun SARA-R4 NBIoT... serialNBIOT 9600 8N1");
 			nbiot_connection_lost = false;
 
-			//ON AJOUTE ICI
+			if (lte.setModeFormat() == LTE_SHIELD_SUCCESS)
+			{
+				Debug.print("Set mode and format!");
+			}
+			else
+			{
+				Debug.print("Can't set mode and format!");
+				cfg::has_nbiot = false;
+			}
+
+			delay(5000);
+
+			if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+			{
+				Debug.println(currentOperator);
+				Debug.println(atoi(currentOperator.c_str()));
+				Debug.println(cfg::operateur);
+				Debug.println(atoi(currentOperator.c_str()) == cfg::operateur);
+
+				if (atoi(currentOperator.c_str()) != cfg::operateur)
+				{
+				if (lte.registerOperatorWithNumber(cfg::operateur) == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("Network Orange registered\r\n");
+					}
+					else
+					{
+						Debug.println(F("Error connecting to operator. Reset and try again, or try another network."));
+						cfg::has_nbiot = false;
+					}
+				}
+				else
+				{
+					Debug.print("Orange is currrent operator!");
+				}
+			}
+			else
+			{
+				Debug.print("Current operator can't be found!");
+				cfg::has_nbiot = false;
+			}
+
+			delay(5000);
+
+			if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
+			{
+			Debug.println(String(currentApn));
+			Debug.println(cfg::apn);
+			Debug.println(String(currentApn) == cfg::apn);
+
+			if(String(currentApn) != cfg::apn)
+			{
+					if (lte.setAPN(cfg::apn) == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("APN Hologram successfully set.\r\n");
+					}
+					else
+					{
+						Debug.println("Error setting APN. Try cycling power to the shield/Arduino.");
+						cfg::has_nbiot = false;
+					}
+			}else{
+					Debug.println("Hologram is now currrent APN!");
+					Debug.print("IP: ");
+					Debug.println(ip);
+			}
+			}
+			else
+			{
+				Debug.print("Current APN can't be found!");
+
+				if (lte.setAPN(cfg::apn) == LTE_SHIELD_SUCCESS)
+				{
+					Debug.println("APN Hologram now successfully set.\r\n");
+				}
+				else
+				{
+					Debug.println("Error setting APN. Try cycling power to the shield/Arduino.");
+					cfg::has_nbiot = false;
+				}
+			}
+
+			delay(5000);
+
+			// Received signal strength
+        Debug.println("RSSI: " + String(lte.rssi()));
+        Debug.println();
+
+        if (cfg::nbiot_format == 0)
+        {
+            Debug.println("Set profile API Aircarto");
+
+            if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Host 0: ");
+                Debug.println(cfg::host_nbiot_json);
+            }
+
+            if (cfg::ssl_nbiot_json)
+            {
+
+                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("CA AirCarto set up!");
+                }
+
+                if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 1");
+                }
+
+                if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 2");
+                }
+
+                if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("SSL API AirCarto");
+                }
+            }
+            
+            if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Port 0: ");
+                Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
+            }
+
+            if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Header 0/0: ");
+                Debug.println("0:Content-Type:application/json");
+            }
+
+        }
+
+        if (cfg::nbiot_format == 1)
+        {
+            Debug.println("Set profile API Aircarto");
+
+            if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Host 0: ");
+                Debug.println(cfg::host_nbiot_byte);
+            }
+
+            if (cfg::ssl_nbiot_byte)
+            {
+
+                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("CA AirCarto set up!");
+                }
+
+                if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 1");
+                }
+
+                if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("Set security profile 2");
+                }
+
+                if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.println("SSL API AirCarto");
+                }
+            }
+            
+            if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
+            {
+                Debug.print("Port 0: ");
+                Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
+            }
+
+                if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.print("Header 0/0: ");
+                    Debug.println("0:Content-Type:application/octet-stream");
+                }
+
+                String headerstr01 = "1:SensorID:" + esp_chipid;
+
+                if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
+                {
+                    Debug.print("Header 0/1: ");
+                    Debug.println(headerstr01);
+                }
+        }
+    
+        confignbiot[0] = cfg::sds_read; //REVOIR ICI
+        confignbiot[1] = cfg::npm_read;
+        confignbiot[2] = cfg::bmx280_read;
+        confignbiot[3] = cfg::ccs811_read;
+        confignbiot[4] = cfg::enveano2_read;
+        confignbiot[5] = cfg::rgpd;
+        confignbiot[6] = cfg::has_lora;
+        confignbiot[7] = cfg::has_wifi;
+        //si connection manquée => false
+
+        Debug.print("Configuration:");
+        Debug.println(booltobyte(confignbiot));
+        datanbiot[0] = booltobyte(confignbiot);
 
 		}
 		else
@@ -6368,25 +6388,47 @@ void setup()
 			else
 			{
 
-				for (unsigned int i = 0; i < 3; ++i)
+				// for (unsigned int i = 0; i < 3; ++i)
+				// {
+				// 	for (unsigned int i = 0; i < LEDS_NB; ++i)
+				// 	{
+				// 		leds[i] = colorLED_start;
+				// 		FastLED.show();
+				// 		delay(200);
+				// 	}
+				// 	for (unsigned int i = 0; i < LEDS_NB; ++i)
+				// 	{
+				// 		leds[i] = colorLED_empty;
+				// 	}
+				// 	FastLED.show();
+				// }
+			for (int i = 0; i < 4; i++)
 				{
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_start;
-						FastLED.show();
-						delay(200);
-					}
-					for (unsigned int i = 0; i < LEDS_NB; ++i)
-					{
-						leds[i] = colorLED_empty;
-					}
+					fill_solid(leds, LEDS_NB, colorLED_empty);
 					FastLED.show();
+					delay(250);
+					fill_solid(leds, LEDS_NB, colorLED_start);
+					FastLED.show();
+					delay(250);
 				}
+				fill_solid(leds, LEDS_NB, colorLED_empty);
+				FastLED.show();
 			}
 		}
 	}
 
 	debug_outln_info(F("\nChipId: "), esp_chipid);
+
+	if (cfg::has_wifi)
+	{
+		setupNetworkTime();
+		connectWifi();
+		setup_webserver();
+	}
+	else
+	{
+		wifiConfig();
+	}
 
 	createLoggerConfigs();
 	logEnabledAPIs();
@@ -6417,147 +6459,145 @@ void setup()
 	// 	starttime_Cairsens = starttime;
 	// }
 
-	if (cfg::has_nbiot)
-	{
+	// if (cfg::has_nbiot)
+	// {
 
-		Debug.println(F("NBIoT connection info:"));
-		// APN Connection info: APN name and IP
-		if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.println("APN: " + String(currentApn));
-			Debug.print("IP: ");
-			Debug.println(ip);
-		}
+	// 	Debug.println(F("NBIoT connection info:"));
+	// 	// APN Connection info: APN name and IP
+	// 	if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
+	// 	{
+	// 		Debug.println("APN: " + String(currentApn));
+	// 		Debug.print("IP: ");
+	// 		Debug.println(ip);
+	// 	}
 
-		// Operator name or number
-		if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
-		{
-			Debug.print("Operator: ");
-			Debug.println(currentOperator);
-		}
+	// 	// Operator name or number
+	// 	if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
+	// 	{
+	// 		Debug.print("Operator: ");
+	// 		Debug.println(currentOperator);
+	// 	}
 
-		// Received signal strength
-		Debug.println("RSSI: " + String(lte.rssi()));
-		Debug.println();
+	// 	// Received signal strength
+	// 	Debug.println("RSSI: " + String(lte.rssi()));
+	// 	Debug.println();
 
-		if (cfg::nbiot_format == 0)
-		{
-			Debug.println("Set profile API Aircarto");
+	// 	if (cfg::nbiot_format == 0)
+	// 	{
+	// 		Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 0: ");
-				Debug.println(cfg::host_nbiot_json);
-			}
+	// 		if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Host 0: ");
+	// 			Debug.println(cfg::host_nbiot_json);
+	// 		}
 
-			if (cfg::ssl_nbiot_json)
-			{
+	// 		if (cfg::ssl_nbiot_json)
+	// 		{
 
-				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA AirCarto set up!");
-				}
+	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("CA AirCarto set up!");
+	// 			}
 
-				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
+	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 1");
+	// 			}
 
-				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
+	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 2");
+	// 			}
 
-				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API AirCarto");
-				}
-			}
-			
-			if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 0: ");
-				Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
-			}
+	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("SSL API AirCarto");
+	// 			}
+	// 		}
 
-			if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Header 0/0: ");
-				Debug.println("0:Content-Type:application/json");
-			}
+	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Port 0: ");
+	// 			Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
+	// 		}
 
-		}
+	// 		if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Header 0/0: ");
+	// 			Debug.println("0:Content-Type:application/json");
+	// 		}
+	// 	}
 
-		if (cfg::nbiot_format == 1)
-		{
-			Debug.println("Set profile API Aircarto");
+	// 	if (cfg::nbiot_format == 1)
+	// 	{
+	// 		Debug.println("Set profile API Aircarto");
 
-			if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Host 0: ");
-				Debug.println(cfg::host_nbiot_byte);
-			}
+	// 		if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Host 0: ");
+	// 			Debug.println(cfg::host_nbiot_byte);
+	// 		}
 
-			if (cfg::ssl_nbiot_byte)
-			{
+	// 		if (cfg::ssl_nbiot_byte)
+	// 		{
 
-				if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("CA AirCarto set up!");
-				}
+	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("CA AirCarto set up!");
+	// 			}
 
-				if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 1");
-				}
+	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 1");
+	// 			}
 
-				if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("Set security profile 2");
-				}
+	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("Set security profile 2");
+	// 			}
 
-				if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.println("SSL API AirCarto");
-				}
-			}
-			
-			if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
-			{
-				Debug.print("Port 0: ");
-				Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
-			}
+	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+	// 			{
+	// 				Debug.println("SSL API AirCarto");
+	// 			}
+	// 		}
 
-				if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 0/0: ");
-					Debug.println("0:Content-Type:application/octet-stream");
-				}
+	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Port 0: ");
+	// 			Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
+	// 		}
 
-				String headerstr01 = "1:SensorID:" + esp_chipid;
+	// 		if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Header 0/0: ");
+	// 			Debug.println("0:Content-Type:application/octet-stream");
+	// 		}
 
-				if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
-				{
-					Debug.print("Header 0/1: ");
-					Debug.println(headerstr01);
-				}
-		}
-	
+	// 		String headerstr01 = "1:SensorID:" + esp_chipid;
 
-		confignbiot[0] = cfg::sds_read; //REVOIR ICI
-		confignbiot[1] = cfg::npm_read;
-		confignbiot[2] = cfg::bmx280_read;
-		confignbiot[3] = cfg::ccs811_read;
-		confignbiot[4] = cfg::enveano2_read;
-		confignbiot[5] = cfg::rgpd;
-		confignbiot[6] = cfg::has_lora;
-		confignbiot[7] = cfg::has_wifi;
-		//si connection manquée => false
+	// 		if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
+	// 		{
+	// 			Debug.print("Header 0/1: ");
+	// 			Debug.println(headerstr01);
+	// 		}
+	// 	}
 
-		Debug.print("Configuration:");
-		Debug.println(booltobyte(confignbiot));
-		datanbiot[0] = booltobyte(confignbiot);
-	}
+	// 	confignbiot[0] = cfg::sds_read; //REVOIR ICI
+	// 	confignbiot[1] = cfg::npm_read;
+	// 	confignbiot[2] = cfg::bmx280_read;
+	// 	confignbiot[3] = cfg::ccs811_read;
+	// 	confignbiot[4] = cfg::enveano2_read;
+	// 	confignbiot[5] = cfg::rgpd;
+	// 	confignbiot[6] = cfg::has_lora;
+	// 	confignbiot[7] = cfg::has_wifi;
+	// 	//si connection manquée => false
+
+	// 	Debug.print("Configuration:");
+	// 	Debug.println(booltobyte(confignbiot));
+	// 	datanbiot[0] = booltobyte(confignbiot);
+	// }
 
 	if (cfg::has_lora && lorachip)
 	{
@@ -6601,29 +6641,28 @@ void setup()
 
 		// Start job (sending automatically starts OTAA too)
 		do_send(&sendjob); // values are -1, -128 etc. they can be easily filtered
-	
 
-	//AJOUTER lora_connection_lost ??
+		//AJOUTER lora_connection_lost ??
 
-	// Prepare the configuration summary for the following messages (the first is 00000000)
+		// Prepare the configuration summary for the following messages (the first is 00000000)
 
-	configlorawan[0] = cfg::sds_read; //REVOIR ICI
-	configlorawan[1] = cfg::npm_read;
-	configlorawan[2] = cfg::bmx280_read;
-	configlorawan[3] = cfg::ccs811_read;
-	configlorawan[4] = cfg::enveano2_read;
-	configlorawan[5] = cfg::rgpd;
-	configlorawan[6] = cfg::has_nbiot;
-	configlorawan[7] = cfg::has_wifi;
-	//si connection manquée => false
+		configlorawan[0] = cfg::sds_read; //REVOIR ICI
+		configlorawan[1] = cfg::npm_read;
+		configlorawan[2] = cfg::bmx280_read;
+		configlorawan[3] = cfg::ccs811_read;
+		configlorawan[4] = cfg::enveano2_read;
+		configlorawan[5] = cfg::rgpd;
+		configlorawan[6] = cfg::has_nbiot;
+		configlorawan[7] = cfg::has_wifi;
+		//si connection manquée => false
 
-	Debug.print("Configuration:");
-	Debug.println(booltobyte(configlorawan));
-	datalora[0] = booltobyte(configlorawan);
+		Debug.print("Configuration:");
+		Debug.println(booltobyte(configlorawan));
+		datalora[0] = booltobyte(configlorawan);
 	}
-	
+
 	Debug.printf("End of void setup()\n");
-	starttime_waiter = starttime  = millis(); // store the start time
+	starttime_waiter = starttime = millis(); // store the start time
 	time_point_device_start_ms = starttime;
 
 	if (cfg::npm_read)
@@ -6645,7 +6684,6 @@ void setup()
 	{
 		starttime_Cairsens = starttime;
 	}
-
 }
 
 void loop()
@@ -6688,10 +6726,13 @@ void loop()
 					{
 						for (unsigned int i = 0; i < LEDS_NB; ++i)
 						{
-							if(i & 1){
-							leds[i] = colorLED_start;
-							}else{
-							leds[i] = colorLED_empty;
+							if (i & 1)
+							{
+								leds[i] = colorLED_start;
+							}
+							else
+							{
+								leds[i] = colorLED_empty;
 							}
 						}
 						FastLED.show();
@@ -6717,10 +6758,13 @@ void loop()
 					{
 						for (unsigned int i = 0; i < LEDS_NB; ++i)
 						{
-							if(i & 1){
-							leds[i] = colorLED_empty;
-							}else{
-							leds[i] = colorLED_start;
+							if (i & 1)
+							{
+								leds[i] = colorLED_empty;
+							}
+							else
+							{
+								leds[i] = colorLED_start;
 							}
 						}
 						FastLED.show();
