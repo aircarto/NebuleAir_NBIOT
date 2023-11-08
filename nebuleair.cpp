@@ -1306,7 +1306,7 @@ int last_update_returncode;
 int last_sendData_returncode;
 
 bool wifi_connection_lost;
-bool lora_connection_lost; //RETESTER poure ajouter lost
+bool lora_connection_lost; 
 bool nbiot_connection_lost;
 
 /*****************************************************************
@@ -1416,6 +1416,7 @@ uint16_t ccs811_val_count = 0;
 String last_data_string;
 int last_signal_strength_wifi;
 int last_signal_strength_nbiot;
+int last_signal_quality_nbiot;
 int last_signal_strength_lorawan;
 int last_disconnect_reason;
 
@@ -3017,7 +3018,8 @@ static void webserver_values()
 	float dew_point_temp;
 
 	const int signal_quality_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
-	const int signal_quality_nbiot = calcNBIoTSignalQuality(last_signal_strength_nbiot);
+	const int signal_strength_nbiot = last_signal_strength_nbiot; //0-31
+	const int signal_quality_nbiot = last_signal_quality_nbiot; //0-7
 	const int signal_quality_lorawan = calcLoRaWANSignalQuality(last_signal_strength_lorawan);
 	debug_outln_info(F("ws: values ..."));
 	if (!count_sends)
@@ -3128,8 +3130,8 @@ static void webserver_values()
 
 	if (cfg::has_nbiot)
 	{
-		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_nbiot), "dBm");
-		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality_nbiot), "%");
+		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength_nbiot * 3), "%");
+		add_table_value(F("NBIoT"), FPSTR(INTL_SIGNAL_QUALITY), String(last_signal_quality_nbiot), "(0 à 7)");
 	}
 
 	if (cfg::has_lora)
@@ -5331,12 +5333,20 @@ static unsigned long sendDataToOptionalApisNBIoTBytes(const uint8_t *data, size_
 
 	if (cfg::nbiot_format == 1)
 	{
-		String headerstr02 = "2:SignalNBIoT:" + String(last_signal_strength_nbiot);
+		String headerstr02 = "2:StrengthNBIoT:" + String(last_signal_strength_nbiot);
 
 		if (lte.setHeader(0, headerstr02.c_str()) == LTE_SHIELD_SUCCESS)
 		{
 			Debug.print("Header 0/2: ");
 			Debug.println(headerstr02);
+		}
+
+		String headerstr03 = "3:QualityNBIoT:" + String(last_signal_quality_nbiot);
+
+		if (lte.setHeader(0, headerstr03.c_str()) == LTE_SHIELD_SUCCESS)
+		{
+			Debug.print("Header 0/3: ");
+			Debug.println(headerstr03);
 		}
 
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api NBIoT byte: "));
@@ -5474,7 +5484,6 @@ void onEvent(ev_t ev)
 	{
 	case EV_SCAN_TIMEOUT:
 		Debug.println(F("EV_SCAN_TIMEOUT"));
-		//lora_connection_lost = true;
 		break;
 	case EV_BEACON_FOUND:
 		Debug.println(F("EV_BEACON_FOUND"));
@@ -5534,11 +5543,9 @@ void onEvent(ev_t ev)
 		*/
 	case EV_JOIN_FAILED:
 		Debug.println(F("EV_JOIN_FAILED"));
-		//lora_connection_lost = true;
 		break;
 	case EV_REJOIN_FAILED:
 		Debug.println(F("EV_REJOIN_FAILED"));
-		//lora_connection_lost = true;
 		break;
 	case EV_TXCOMPLETE:
 		Debug.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
@@ -6212,6 +6219,7 @@ void setup()
 
 			// Received signal strength
         Debug.println("RSSI: " + String(lte.rssi()));
+		Debug.println("Quality: " + String(lte.qual()));
         Debug.println();
 
         if (cfg::nbiot_format == 0)
@@ -6436,169 +6444,6 @@ void setup()
 
 	delay(50);
 
-	// starttime = millis(); // store the start time
-	// time_point_device_start_ms = starttime;
-
-	// if (cfg::npm_read)
-	// {
-	// 	starttime_NPM = starttime;
-	// }
-
-	// if (cfg::sds_read)
-	// {
-	// 	starttime_SDS = starttime;
-	// }
-
-	// if (cfg::ccs811_read)
-	// {
-	// 	starttime_CCS811 = starttime;
-	// }
-
-	// if (cfg::enveano2_read)
-	// {
-	// 	starttime_Cairsens = starttime;
-	// }
-
-	// if (cfg::has_nbiot)
-	// {
-
-	// 	Debug.println(F("NBIoT connection info:"));
-	// 	// APN Connection info: APN name and IP
-	// 	if (lte.getAPN(&currentApn, &ip) == LTE_SHIELD_SUCCESS)
-	// 	{
-	// 		Debug.println("APN: " + String(currentApn));
-	// 		Debug.print("IP: ");
-	// 		Debug.println(ip);
-	// 	}
-
-	// 	// Operator name or number
-	// 	if (lte.getOperator(&currentOperator) == LTE_SHIELD_SUCCESS)
-	// 	{
-	// 		Debug.print("Operator: ");
-	// 		Debug.println(currentOperator);
-	// 	}
-
-	// 	// Received signal strength
-	// 	Debug.println("RSSI: " + String(lte.rssi()));
-	// 	Debug.println();
-
-	// 	if (cfg::nbiot_format == 0)
-	// 	{
-	// 		Debug.println("Set profile API Aircarto");
-
-	// 		if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Host 0: ");
-	// 			Debug.println(cfg::host_nbiot_json);
-	// 		}
-
-	// 		if (cfg::ssl_nbiot_json)
-	// 		{
-
-	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("CA AirCarto set up!");
-	// 			}
-
-	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("Set security profile 1");
-	// 			}
-
-	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("Set security profile 2");
-	// 			}
-
-	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("SSL API AirCarto");
-	// 			}
-	// 		}
-
-	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Port 0: ");
-	// 			Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
-	// 		}
-
-	// 		if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Header 0/0: ");
-	// 			Debug.println("0:Content-Type:application/json");
-	// 		}
-	// 	}
-
-	// 	if (cfg::nbiot_format == 1)
-	// 	{
-	// 		Debug.println("Set profile API Aircarto");
-
-	// 		if (lte.setHost(0, cfg::host_nbiot_byte) == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Host 0: ");
-	// 			Debug.println(cfg::host_nbiot_byte);
-	// 		}
-
-	// 		if (cfg::ssl_nbiot_byte)
-	// 		{
-
-	// 			if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("CA AirCarto set up!");
-	// 			}
-
-	// 			if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("Set security profile 1");
-	// 			}
-
-	// 			if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("Set security profile 2");
-	// 			}
-
-	// 			if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-	// 			{
-	// 				Debug.println("SSL API AirCarto");
-	// 			}
-	// 		}
-
-	// 		if (lte.setPort(0, loggerConfigs[LoggerNBIoTByte].destport) == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Port 0: ");
-	// 			Debug.println(loggerConfigs[LoggerNBIoTByte].destport);
-	// 		}
-
-	// 		if (lte.setHeader(0, "0:Content-Type:application/octet-stream") == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Header 0/0: ");
-	// 			Debug.println("0:Content-Type:application/octet-stream");
-	// 		}
-
-	// 		String headerstr01 = "1:SensorID:" + esp_chipid;
-
-	// 		if (lte.setHeader(0, headerstr01.c_str()) == LTE_SHIELD_SUCCESS)
-	// 		{
-	// 			Debug.print("Header 0/1: ");
-	// 			Debug.println(headerstr01);
-	// 		}
-	// 	}
-
-	// 	confignbiot[0] = cfg::sds_read; //REVOIR ICI
-	// 	confignbiot[1] = cfg::npm_read;
-	// 	confignbiot[2] = cfg::bmx280_read;
-	// 	confignbiot[3] = cfg::ccs811_read;
-	// 	confignbiot[4] = cfg::enveano2_read;
-	// 	confignbiot[5] = cfg::rgpd;
-	// 	confignbiot[6] = cfg::has_lora;
-	// 	confignbiot[7] = cfg::has_wifi;
-	// 	//si connection manquée => false
-
-	// 	Debug.print("Configuration:");
-	// 	Debug.println(booltobyte(confignbiot));
-	// 	datanbiot[0] = booltobyte(confignbiot);
-	// }
-
 	if (cfg::has_lora && lorachip)
 	{
 
@@ -6641,8 +6486,6 @@ void setup()
 
 		// Start job (sending automatically starts OTAA too)
 		do_send(&sendjob); // values are -1, -128 etc. they can be easily filtered
-
-		//AJOUTER lora_connection_lost ??
 
 		// Prepare the configuration summary for the following messages (the first is 00000000)
 
@@ -6855,6 +6698,7 @@ void loop()
 		if (cfg::has_nbiot && !nbiot_connection_lost)
 		{
 			last_signal_strength_nbiot = lte.rssi();
+			last_signal_quality_nbiot = lte.qual();
 		}
 
 		if (cfg::has_lora && !lora_connection_lost)
@@ -6950,7 +6794,8 @@ void loop()
 
 		if (cfg::has_nbiot)
 		{
-			add_Value2Json(data, F("signal_nbiot"), String(last_signal_strength_nbiot));
+			add_Value2Json(data, F("signal_nbiot_strength"), String(last_signal_strength_nbiot));
+			add_Value2Json(data, F("signal_nbiot_quality"), String(last_signal_quality_nbiot));
 		}
 
 		if (cfg::has_lora)
@@ -7313,7 +7158,7 @@ void loop()
 			if (cfg::has_nbiot && ((!cfg::has_wifi && !cfg::has_lora) || (cfg::has_wifi && wifi_connection_lost && cfg::has_lora && lora_connection_lost) || (cfg::has_wifi && wifi_connection_lost && !cfg::has_lora) || (!cfg::has_wifi && cfg::has_lora && lora_connection_lost)) && !nbiot_connection_lost)
 			{
 
-				int32_t signal_diplay_nbiot = calcWiFiSignalQuality(last_signal_strength_nbiot);
+				int32_t signal_diplay_nbiot = last_signal_strength_nbiot * 3 ;
 				displayColor_NBIoT = interpolateSignal(signal_diplay_nbiot, 33, 66);
 				colorLED_nbiot = CRGB(displayColor_NBIoT.R, displayColor_NBIoT.G, displayColor_NBIoT.B);
 

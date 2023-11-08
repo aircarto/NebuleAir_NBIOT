@@ -189,6 +189,7 @@ public:
 
     // Network service AT commands
     int8_t rssi(void);
+    int8_t qual(void);
     LTE_Shield_registration_status_t registration(void);
     boolean setNetwork(mobile_network_operator_t mno);
     mobile_network_operator_t getNetwork(void);
