@@ -22,7 +22,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 
 //NBIoT
 
-#define HAS_NBIOT 1
+#define HAS_NBIOT 0
 #define CONFIG_NBIOT 0
 
 // APN -- Access Point Name. Gateway between GPRS MNO

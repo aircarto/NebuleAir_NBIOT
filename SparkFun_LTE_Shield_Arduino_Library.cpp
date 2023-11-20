@@ -614,6 +614,49 @@ int8_t LTE_Shield::rssi(void)
     return rssi;
 }
 
+
+int8_t LTE_Shield::qual(void)
+{
+    char *command;
+    char *response;
+    LTE_Shield_error_t err;
+    int qual;
+
+    command = lte_calloc_char(strlen(LTE_SHIELD_SIGNAL_QUALITY) + 1);
+    if (command == NULL)
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    sprintf(command, "%s", LTE_SHIELD_SIGNAL_QUALITY);
+
+    response = lte_calloc_char(48);
+    if (response == NULL)
+    {
+        free(command);
+        return LTE_SHIELD_ERROR_OUT_OF_MEMORY;
+    }
+
+    err = sendCommandWithResponse(command,
+                                  LTE_SHIELD_RESPONSE_OK, response, 10000, AT_COMMAND);
+    if (err != LTE_SHIELD_ERROR_SUCCESS)
+    {
+        free(command);
+        free(response);
+        return -1;
+    }
+
+    if (sscanf(response, "\r\n+CSQ: %*d,%d", &qual) != 1)
+    {
+        qual = -1;
+    }
+
+    free(command);
+    free(response);
+    return qual;
+}
+
+
+
+
+
 LTE_Shield_registration_status_t LTE_Shield::registration(void)
 {
     char *command;
