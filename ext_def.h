@@ -18,18 +18,18 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define FS_SSID ""
 #define FS_PWD "nebuleaircfg"
 
-#define HAS_WIFI 0
+#define HAS_WIFI 1
 
 //NBIoT
 
-#define HAS_NBIOT 0
+#define HAS_NBIOT 1
 #define CONFIG_NBIOT 0
 
 // APN -- Access Point Name. Gateway between GPRS MNO
 // and another computer network. E.g. "hologram
 const char APN[] PROGMEM = "hologram";  
 //const unsigned int OPERATEUR = 20801; // ORANGE!!!!!
-const unsigned int OPERATEUR = 26201;
+const unsigned int OPERATEUR = 20801;
 //const unsigned int OPERATEUR = 26202;
 
 #define NBIOT_FORMAT 1  // 0 = json 1 = byte
@@ -47,7 +47,7 @@ const char APPKEY[] = "000";
 #define SEND2MADAVI 0
 #define SSL_MADAVI 0
 #define SEND2CSV 0
-#define SEND2CUSTOM 0
+#define SEND2CUSTOM 1
 #define SEND2CUSTOM2 0
 
 enum LoggerEntry {
