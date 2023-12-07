@@ -4900,7 +4900,7 @@ static void fetchSensorCairsens(String &s)
 			Cairsens_error_count++;
 		}
 		}else{
-		if (no2_val_count >= 12)
+		if (no2_val_count >= 10)
 		{
 			// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
 			last_value_no2 = float(no2_sum / no2_val_count);  // on envoie ppb
