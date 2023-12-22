@@ -6126,6 +6126,7 @@ void setup()
 	{
 		//serialNBIOT.setTimeout(5000); //to test ?
 		//IL VA FALLOIR TIMEOUTER ICI
+		Debug.println("Try to reach NBIOT shield:");
 
 		if (lte.begin(serialNBIOT, 9600, SERIAL_8N1, NBIOT_SERIAL_RX, NBIOT_SERIAL_TX))
 		{
@@ -6135,11 +6136,11 @@ void setup()
 
 			if (lte.setModeFormat() == LTE_SHIELD_SUCCESS)
 			{
-				Debug.print("Set mode and format!");
+				Debug.println("Set mode and format!");
 			}
 			else
 			{
-				Debug.print("Can't set mode and format!");
+				Debug.println("Can't set mode and format!");
 				cfg::has_nbiot = false;
 			}
 
@@ -6166,12 +6167,12 @@ void setup()
 				}
 				else
 				{
-					Debug.print("Orange is currrent operator!");
+					Debug.println("Orange is currrent operator!");
 				}
 			}
 			else
 			{
-				Debug.print("Current operator can't be found!");
+				Debug.println("Current operator can't be found!");
 				cfg::has_nbiot = false;
 			}
 
@@ -6218,57 +6219,57 @@ void setup()
 			delay(5000);
 
 			// Received signal strength
-        Debug.println("RSSI: " + String(lte.rssi()));
-		Debug.println("Quality: " + String(lte.qual()));
-        Debug.println();
+        	Debug.println("RSSI: " + String(lte.rssi()));
+			Debug.println("Quality: " + String(lte.qual()));
+        	Debug.println();
 
-        if (cfg::nbiot_format == 0)
-        {
-            Debug.println("Set profile API Aircarto");
+        	if (cfg::nbiot_format == 0)
+        	{
+				Debug.println("Set profile API Aircarto");
 
-            if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
-            {
-                Debug.print("Host 0: ");
-                Debug.println(cfg::host_nbiot_json);
-            }
+				if (lte.setHost(0, cfg::host_nbiot_json) == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Host 0: ");
+					Debug.println(cfg::host_nbiot_json);
+				}
 
-            if (cfg::ssl_nbiot_json)
-            {
+				if (cfg::ssl_nbiot_json)
+				{
 
-                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
-                {
-                    Debug.println("CA AirCarto set up!");
-                }
+					if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("CA AirCarto set up!");
+					}
 
-                if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
-                {
-                    Debug.println("Set security profile 1");
-                }
+					if (lte.setSecProfile1(0) == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("Set security profile 1");
+					}
 
-                if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
-                {
-                    Debug.println("Set security profile 2");
-                }
+					if (lte.setSecProfile2(0, "certAircarto") == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("Set security profile 2");
+					}
 
-                if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
-                {
-                    Debug.println("SSL API AirCarto");
-                }
-            }
-            
-            if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
-            {
-                Debug.print("Port 0: ");
-                Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
-            }
+					if (lte.setSSL(0, 0) == LTE_SHIELD_SUCCESS)
+					{
+						Debug.println("SSL API AirCarto");
+					}
+				}
+				
+				if (lte.setPort(0, loggerConfigs[LoggerNBIoTJson].destport) == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Port 0: ");
+					Debug.println(loggerConfigs[LoggerNBIoTJson].destport);
+				}
 
-            if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
-            {
-                Debug.print("Header 0/0: ");
-                Debug.println("0:Content-Type:application/json");
-            }
+				if (lte.setHeader(0, "0:Content-Type:application/json") == LTE_SHIELD_SUCCESS)
+				{
+					Debug.print("Header 0/0: ");
+					Debug.println("0:Content-Type:application/json");
+				}
 
-        }
+        	}
 
         if (cfg::nbiot_format == 1)
         {
