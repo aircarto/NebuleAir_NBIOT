@@ -160,6 +160,8 @@ boolean LTE_Shield::begin(HardwareSerial &hardSerial, unsigned long baud, uint32
     LTE_Shield_error_t err;
 
     _hardSerial = &hardSerial;
+    
+    Debug.println("Test before init");
 
     err = init(baud, config, rxPin, txPin);
     if (err == LTE_SHIELD_ERROR_SUCCESS)
@@ -1681,6 +1683,8 @@ LTE_Shield_error_t LTE_Shield::gpsRequest(unsigned int timeout, uint32_t accurac
 
 LTE_Shield_error_t LTE_Shield::init(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, LTE_Shield::LTE_Shield_init_type_t initType)
 {
+    Debug.println("Test before begin serial");
+
     LTE_Shield_error_t err;
 
     beginSerial(baud, config, rxPin, txPin); // Begin serial
@@ -2231,8 +2235,11 @@ int LTE_Shield::hwAvailable(void)
 
 void LTE_Shield::beginSerial(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin)
 {
+    Debug.println("Test LTE_Shiel Begin Serial");
+
     if (_hardSerial != NULL)
-    {
+    {   
+        Debug.println("Inside HardSerial Begin (if)");
         _hardSerial->begin(baud, config, rxPin, txPin);
     }
 #ifdef LTE_SHIELD_SOFTWARE_SERIAL_ENABLED
