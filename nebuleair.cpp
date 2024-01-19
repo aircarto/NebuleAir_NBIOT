@@ -2326,6 +2326,32 @@ static String form_checkbox(const ConfigShapeId cfgid, const String &info, const
 	return s;
 }
 
+static String form_checkbox_disabled(const ConfigShapeId cfgid, const String &info, const bool linebreak)
+{
+	RESERVE_STRING(s, MED_STR);
+	s = F("<label for='{n}'>"
+		  "<input form='main' type='checkbox' name='{n}' value='1' id='{n}' {c} disabled/>"
+		  "<input form='main' type='hidden' name='{n}' value='0'/>"
+		  "{i}</label><br/>");
+
+	if (*configShape[cfgid].cfg_val.as_bool)
+	{
+		s.replace("{c}", F(" checked='checked'"));
+	}
+	else
+	{
+		s.replace("{c}", emptyString);
+	};
+	s.replace("{i}", info);
+	s.replace("{n}", String(configShape[cfgid].cfg_key()));
+	if (!linebreak)
+	{
+		s.replace("<br/>", emptyString);
+	}
+	return s;
+}
+
+
 static String form_submit(const String &value)
 {
 	String s = F("<tr>"
@@ -2710,18 +2736,18 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	//server.sendContent(page_content);
 	page_content += FPSTR(BR_TAG);
-	page_content += form_checkbox(Config_send2custom2, FPSTR(INTL_SEND_TO_OWN_API2), false);
+	page_content += form_checkbox_disabled(Config_send2custom2, FPSTR(INTL_SEND_TO_OWN_API2), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-	page_content += form_checkbox(Config_ssl_custom2, FPSTR(WEB_HTTPS), false);
+	page_content += form_checkbox_disabled(Config_ssl_custom2, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
-	server.sendContent(page_content);
-	page_content = FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_host_custom2, FPSTR(INTL_SERVER2), LEN_HOST_CUSTOM2 - 1);
-	add_form_input(page_content, Config_url_custom2, FPSTR(INTL_PATH2), LEN_URL_CUSTOM2 - 1);
-	add_form_input(page_content, Config_port_custom2, FPSTR(INTL_PORT2), MAX_PORT_DIGITS2);
-	add_form_input(page_content, Config_user_custom2, FPSTR(INTL_USER2), LEN_USER_CUSTOM2 - 1);
-	add_form_input(page_content, Config_pwd_custom2, FPSTR(INTL_PASSWORD2), LEN_CFG_PASSWORD2 - 1);
-	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	// server.sendContent(page_content);
+	// page_content = FPSTR(TABLE_TAG_OPEN);
+	// add_form_input(page_content, Config_host_custom2, FPSTR(INTL_SERVER2), LEN_HOST_CUSTOM2 - 1);
+	// add_form_input(page_content, Config_url_custom2, FPSTR(INTL_PATH2), LEN_URL_CUSTOM2 - 1);
+	// add_form_input(page_content, Config_port_custom2, FPSTR(INTL_PORT2), MAX_PORT_DIGITS2);
+	// add_form_input(page_content, Config_user_custom2, FPSTR(INTL_USER2), LEN_USER_CUSTOM2 - 1);
+	// add_form_input(page_content, Config_pwd_custom2, FPSTR(INTL_PASSWORD2), LEN_CFG_PASSWORD2 - 1);
+	// page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	server.sendContent(page_content);
 	page_content = emptyString;
 
