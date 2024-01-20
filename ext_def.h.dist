@@ -47,7 +47,7 @@ const char APPKEY[] = "000";
 #define SSL_MADAVI 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
-#define SEND2CUSTOM2 0
+#define SEND2CUSTOM2 1
 
 enum LoggerEntry {
     LoggerSensorCommunity,
