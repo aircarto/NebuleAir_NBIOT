@@ -2331,16 +2331,18 @@ static String form_checkbox_disabled(const ConfigShapeId cfgid, const String &in
 	RESERVE_STRING(s, MED_STR);
 	s = F("<label for='{n}'>"
 		  "<input form='main' type='checkbox' name='{n}' value='1' id='{n}' {c} disabled/>"
-		  "<input form='main' type='hidden' name='{n}' value='0'/>"
+		  "<input form='main' type='hidden' name='{n}' value='{h}'/>"
 		  "{i}</label><br/>");
 
 	if (*configShape[cfgid].cfg_val.as_bool)
 	{
 		s.replace("{c}", F(" checked='checked'"));
+		s.replace("{h}", F("1"));
 	}
 	else
 	{
 		s.replace("{c}", emptyString);
+		s.replace("{h}", F("0"));
 	};
 	s.replace("{i}", info);
 	s.replace("{n}", String(configShape[cfgid].cfg_key()));
