@@ -6808,6 +6808,12 @@ void loop()
 			data += result_Cairsens;
 		}
 
+		if (cfg::npm_read)
+		{
+			add_Value2Json(data, F("state_npm"), current_state_npm);
+			add_Value2Json(data, F("th_npm"), current_th_npm);
+		}
+
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
