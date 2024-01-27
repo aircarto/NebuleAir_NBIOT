@@ -46,8 +46,8 @@ const char APPKEY[] = "000";
 #define SEND2MADAVI 0
 #define SSL_MADAVI 0
 #define SEND2CSV 0
-#define SEND2CUSTOM 0
-#define SEND2CUSTOM2 1
+#define SEND2CUSTOM 0  //API AirCarto
+#define SEND2CUSTOM2 0 //API AtmoSud MicroSpot
 
 enum LoggerEntry {
     LoggerSensorCommunity,
@@ -78,7 +78,7 @@ static const char URL_SENSORCOMMUNITY[] PROGMEM = "/v1/push-sensor-data/";
 static const char NTP_SERVER_1[] PROGMEM = "ntp-p1.obspm.fr";
 static const char NTP_SERVER_2[] PROGMEM = "ntp.obspm.fr";
 
-// define own API
+// WIFI API (AirCarto)
 static const char HOST_CUSTOM[] PROGMEM = "data.nebuleair.fr";
 static const char URL_CUSTOM[] PROGMEM = "/wifi.php";
 #define PORT_CUSTOM 80
@@ -86,7 +86,7 @@ static const char URL_CUSTOM[] PROGMEM = "/wifi.php";
 #define PWD_CUSTOM ""
 #define SSL_CUSTOM 0
 
-// define own API
+// WIFI API 2 (AtmoSud MicroSpot)
 static const char HOST_CUSTOM2[] PROGMEM = "192.168.234.1";
 static const char URL_CUSTOM2[] PROGMEM = "/data.php";
 #define PORT_CUSTOM2 80

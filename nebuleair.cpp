@@ -4241,10 +4241,10 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 			clientSecure->setCACert(dst_root_ca_x3);
 			break;
 		case LoggerCustom:
-			clientSecure->setCACert(ca_aircarto);
+			clientSecure->setCACert(isrg_root_x1);
 			break;
 		case LoggerCustom2:
-			clientSecure->setCACert(ca_atmo);
+			clientSecure->setCACert(isrg_root_x1);
 			break;
 		}
 
@@ -6264,7 +6264,7 @@ void setup()
 				if (cfg::ssl_nbiot_json)
 				{
 
-					if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+					if (lte.setCAroot(isrg_root_x1, "certAircarto") == LTE_SHIELD_SUCCESS)
 					{
 						Debug.println("CA AirCarto set up!");
 					}
@@ -6312,7 +6312,7 @@ void setup()
             if (cfg::ssl_nbiot_byte)
             {
 
-                if (lte.setCAroot(ca_aircarto, "certAircarto") == LTE_SHIELD_SUCCESS)
+                if (lte.setCAroot(isrg_root_x1, "certAircarto") == LTE_SHIELD_SUCCESS)
                 {
                     Debug.println("CA AirCarto set up!");
                 }
