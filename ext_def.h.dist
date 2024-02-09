@@ -6,7 +6,7 @@ const char WLANSSID[] PROGMEM = "XXXXXXXXXXX";
 const char WLANPWD[] PROGMEM = "XXXXXXXXXXX";
 
 
-#define TIME_FOR_WIFI_CONFIG 240000;
+#define TIME_FOR_WIFI_CONFIG 480000;
 #define SENDING_INTERVALL_MS 120000;
 
 // BasicAuth config
@@ -81,10 +81,10 @@ static const char NTP_SERVER_2[] PROGMEM = "ntp.obspm.fr";
 // WIFI API (AirCarto)
 static const char HOST_CUSTOM[] PROGMEM = "data.nebuleair.fr";
 static const char URL_CUSTOM[] PROGMEM = "/wifi.php";
-#define PORT_CUSTOM 80
+#define PORT_CUSTOM 80         // 80 for HTTP and 443 for HTTPS
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
-#define SSL_CUSTOM 0
+#define SSL_CUSTOM 0        // -> 1 to activate HTTPS
 
 // WIFI API 2 (AtmoSud MicroSpot)
 static const char HOST_CUSTOM2[] PROGMEM = "192.168.234.1";
@@ -126,7 +126,7 @@ static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
 #define SDS_API_PIN 1
 
 // Tera Sensor Next PM sensor
-#define NPM_READ 0
+#define NPM_READ 1
 // #define NPM_FULLTIME 1
 #define NPM_API_PIN 1
 
