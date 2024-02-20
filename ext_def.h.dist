@@ -6,8 +6,8 @@ const char WLANSSID[] PROGMEM = "XXXXXXXXXXX";
 const char WLANPWD[] PROGMEM = "XXXXXXXXXXX";
 
 
-#define TIME_FOR_WIFI_CONFIG 480000;
-#define SENDING_INTERVALL_MS 120000;
+#define TIME_FOR_WIFI_CONFIG 480000;  //stay in wifi config for 8min (48000ms)
+#define SENDING_INTERVALL_MS 120000;  //send data every 2min (12000ms)
 
 // BasicAuth config
 const char WWW_USERNAME[] PROGMEM = "admin";
