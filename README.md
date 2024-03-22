@@ -85,8 +85,8 @@ The .ini file should be able to get all the needed boards, platforms and librari
 |GPIO33| 💡LEDs |  |
 |GPIO34| 📶 lora DIO2 |  |
 |GPIO35| 📶 lora DIO1 |  |
-|GPIO36| SARA-R4 TX | |
-|GPIO39| NextPM TX |  |
+|GPIO36| SARA-R4 TX | GPIO36 is called SVP on ESP32|
+|GPIO39| NextPM TX | GPIO39 is called SVN on ESP32 |
 
 ## PCB
 
