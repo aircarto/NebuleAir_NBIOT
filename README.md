@@ -59,7 +59,7 @@ The .ini file should be able to get all the needed boards, platforms and librari
 |GPI01| TX | USB Serial |
 |GPIO2| unused | Inboard LED |
 |GPIO3| RX | USB Serial |
-|GPIO4| unused |  |
+|GPIO4| SARA-R4 POWER_PIN |  |
 |GPIO5| 📶 lora NSS | notes |
 |GPIO6| &#x1F6D1; | integrated SPI flash |
 |GPIO7| &#x1F6D1; | integrated SPI flash |
@@ -68,7 +68,7 @@ The .ini file should be able to get all the needed boards, platforms and librari
 |GPIO10| &#x1F6D1; | integrated SPI flash |
 |GPIO11| &#x1F6D1; | integrated SPI flash |
 |GPIO12| unused |  |
-|GPIO13| unused |  |
+|GPIO13| SARA-R4 RESET_PIN |  |
 |GPIO14| unused |  |
 |GPIO15| unused |  |
 |GPIO16| Cairsens RX |  |
@@ -85,8 +85,8 @@ The .ini file should be able to get all the needed boards, platforms and librari
 |GPIO33| 💡LEDs |  |
 |GPIO34| 📶 lora DIO2 |  |
 |GPIO35| 📶 lora DIO1 |  |
-|GPIO36| SARA-R4 TX | |
-|GPIO39| NextPM TX |  |
+|GPIO36| SARA-R4 TX | GPIO36 is called SVP on ESP32|
+|GPIO39| NextPM TX | GPIO39 is called SVN on ESP32 |
 
 ## PCB
 
