@@ -18,7 +18,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define FS_SSID ""
 #define FS_PWD "nebuleaircfg"
 
-#define HAS_WIFI 0
+#define HAS_WIFI 1
 
 //NBIoT
 
@@ -46,7 +46,7 @@ const char APPKEY[] = "000";
 #define SEND2MADAVI 0
 #define SSL_MADAVI 0
 #define SEND2CSV 0
-#define SEND2CUSTOM 0  //API AirCarto
+#define SEND2CUSTOM 1  //API AirCarto
 #define SEND2CUSTOM2 0 //API AtmoSud MicroSpot
 
 enum LoggerEntry {
@@ -81,10 +81,10 @@ static const char NTP_SERVER_2[] PROGMEM = "ntp.obspm.fr";
 // WIFI API (AirCarto)
 static const char HOST_CUSTOM[] PROGMEM = "data.nebuleair.fr";
 static const char URL_CUSTOM[] PROGMEM = "/wifi.php";
-#define PORT_CUSTOM 80         // 80 for HTTP and 443 for HTTPS
+#define PORT_CUSTOM 443         // 80 for HTTP and 443 for HTTPS
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
-#define SSL_CUSTOM 0        // -> 1 to activate HTTPS
+#define SSL_CUSTOM 1        // -> 1 to activate HTTPS
 
 // WIFI API 2 (AtmoSud MicroSpot)
 static const char HOST_CUSTOM2[] PROGMEM = "192.168.234.1";
@@ -131,7 +131,7 @@ static const char URL_NBIOT_BYTE[] PROGMEM = "/nbiotbyte.php";
 #define NPM_API_PIN 1
 
 // BMP280/BME280, temperature, pressure (humidity on BME280)
-#define BMX280_READ 0
+#define BMX280_READ 1
 #define BMP280_API_PIN 3
 #define BME280_API_PIN 11
 
