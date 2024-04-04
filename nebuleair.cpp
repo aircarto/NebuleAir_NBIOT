@@ -242,11 +242,11 @@ CRGB colorLED_value;
 
 //For monoLED
 
-CRGB colorLED_empty = CRGB(0, 0, 0);
-CRGB colorLED_wifi = CRGB(0, 0, 255);
+CRGB colorLED_empty = CRGB(0, 0, 0); //OFF
+CRGB colorLED_wifi = CRGB(0, 0, 255); //BLUE
 CRGB colorLED_lora = CRGB(255, 255, 0);
 CRGB colorLED_nbiot = CRGB(0, 255, 0);
-CRGB colorLED_start = CRGB(255, 255, 255);
+CRGB colorLED_start = CRGB(255, 255, 255); //WHITE
 CRGB colorLED_red = CRGB(255, 0, 0);
 CRGB colorLED_orange = CRGB(255, 128, 0);
 CRGB colorLED_yellow = CRGB(255, 255, 0);
@@ -1052,6 +1052,7 @@ static void drawpicture(uint8_t img[][3])
 	}
 }
 
+//fonction pour la LED Matrix
 static void drawtime1()
 {
 	// for (unsigned int i = 0; i < (LEDS_NB / 2); ++i)
@@ -3651,7 +3652,10 @@ static int selectChannelForAp()
 }
 
 /*****************************************************************
- * WifiConfig                                                    *
+ * WifiConfig
+ * --> Démmare le capteur en mode AP (AccessPoint) 
+ * --> se lance car le capteur n'a pas réussi à se connecter
+ * -->                                                    *
  *****************************************************************/
 
 static void wifiConfig()
@@ -3660,7 +3664,7 @@ static void wifiConfig()
 	if (cfg::has_led_value)
 	{
 
-		if (LEDS_NB == 1)
+		if (LEDS_NB == 1) //seulement une LED
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -3673,10 +3677,10 @@ static void wifiConfig()
 			}
 			leds[0] = colorLED_empty;
 			FastLED.show();
-			leds[0] = colorLED_wifi;
+			leds[0] = colorLED_wifi; //BLUE
 			FastLED.show();
 		}
-		else
+		else //si plusieurs LED (ligne ou Matrix)
 		{
 			if (LEDS_MATRIX)
 			{
@@ -3690,8 +3694,9 @@ static void wifiConfig()
 				drawpicture(wifi);
 				FastLED.show();
 			}
-			else
-			{
+			else //ligne de LEDS
+			{	
+				//flash en rouge car la connexion en STA n'a pas fonctionné
 				for (int i = 0; i < 4; i++)
 				{
 					fill_solid(leds, LEDS_NB, colorLED_empty);
@@ -3701,6 +3706,7 @@ static void wifiConfig()
 					FastLED.show();
 					delay(250);
 				}
+				//Se met en bleu fixe le temps du WifiConfig (AP)
 				fill_solid(leds, LEDS_NB, colorLED_empty);
 				FastLED.show();
 				fill_solid(leds, LEDS_NB, colorLED_empty);
@@ -3711,7 +3717,7 @@ static void wifiConfig()
 		}
 	}
 
-	debug_outln_info(F("Starting WiFiManager"));
+	debug_outln_info(F("Starting WiFiManager (AccessPoint)"));
 	debug_outln_info(F("AP ID: "), String(cfg::fs_ssid));
 	debug_outln_info(F("Password: "), String(cfg::fs_pwd));
 
@@ -3908,6 +3914,7 @@ static WiFiEventId_t STAstopEventHandler;
 
 static void connectWifi()
 {
+	Debug.println("***Start WIFI connect in mode STA****");
 
 	disconnectEventHandler = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info)
 										  {
@@ -3957,7 +3964,7 @@ static void connectWifi()
 
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
-	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
+	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid); //Text "connecting to ...."
 
 	waitForWifiToConnect(40);
 	debug_outln_info(emptyString);
@@ -3968,10 +3975,12 @@ static void connectWifi()
 		cfg::has_wifi = false;
 		// strcpy_P(cfg::wlanssid, "TYPE SSID");
 		// strcpy_P(cfg::wlanpwd, "TYPE PWD");
+		Debug.println("Connection wifi not activated! Start wifiConfig (AP)");
 		wifiConfig();
 	}
 	else
 	{
+		Debug.println("Connection SUCCESSFUL !!!");
 
 		if (LEDS_NB == 1)
 		{
@@ -3980,7 +3989,7 @@ static void connectWifi()
 				leds[0] = colorLED_empty;
 				FastLED.show();
 				delay(250);
-				leds[0] = colorLED_wifi;
+				leds[0] = colorLED_wifi; //BLUE
 				FastLED.show();
 				delay(250);
 			}
@@ -4006,7 +4015,7 @@ static void connectWifi()
 					fill_solid(leds, LEDS_NB, colorLED_empty);
 					FastLED.show();
 					delay(250);
-					fill_solid(leds, LEDS_NB, colorLED_wifi);
+					fill_solid(leds, LEDS_NB, colorLED_wifi); //BLUE
 					FastLED.show();
 					delay(250);
 				}
@@ -4158,12 +4167,12 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
 		break;
 	case LoggerCustom:
-		Debug.print("LoggerAirCarto https: ");
+		Debug.print("Send to AirCarto Server with SSL? (0->no , 1->yes): ");
 		Debug.println(ssl);
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
 		break;
 	case LoggerCustom2:
-		Debug.print("LoggerAtmoSud https: ");
+		Debug.print("Send to AtmoSud (MicroSpot) Server with SSL? (0->no , 1->yes): ");
 		Debug.println(ssl);
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
 		break;
@@ -4172,8 +4181,9 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 		break;
 	}
 
-	if (!ssl)
-	{
+	if (!ssl) //connexion non sécurisée
+	{	
+		Debug.println("Start HTTPCLient");
 		std::unique_ptr<WiFiClient> client(getNewLoggerWiFiClient(logger));
 
 		HTTPClient http;
@@ -4194,6 +4204,7 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 
 		if (http.begin(*client, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session))
 		{
+			Debug.println("http.begin -> true");
 			http.addHeader(F("Content-Type"), contentType);
 			http.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
 			// http.addHeader(F("X-MAC-ID"), String(F(SENSOR_BASENAME)) + esp_mac_id);
@@ -4202,7 +4213,7 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 				http.addHeader(F("X-PIN"), String(pin));
 			}
 
-			result = http.POST(data);
+			result = http.POST(data); //cette fonction renvoie une erreur lorsqu'il n'y a pas d'internet sur le réseau WIFI (hostByName(): DNS Failed)
 
 			if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED)
 			{
@@ -4214,11 +4225,16 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 				debug_outln_info(F("Request http failed with error: "), String(result));
 				debug_outln_info(F("Details:"), http.getString());
 			}
+			else {
+				Debug.println("Problem with http.POST!");
+				//TODO: à partir d'ici passer les LEDs en rouge!
+			}
+
 			http.end();
 		}
-		else
+		else //http.begin send false
 		{
-			debug_outln_info(F("Failed connecting to "), s_Host);
+			debug_outln_info(F("http.begin -> false : Failed connecting to "), s_Host);
 		}
 		if (!send_success && result != 0)
 		{
@@ -4228,8 +4244,9 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 
 		return millis() - start_send;
 	}
-	else
+	else //if SSL
 	{
+		Debug.print("Start SSL POST Request");
 		std::unique_ptr<WiFiClientSecure> clientSecure(getNewLoggerWiFiClientSecure(logger));
 
 		switch (logger)
