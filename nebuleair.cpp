@@ -1290,6 +1290,7 @@ int last_update_returncode;
 int last_sendData_returncode;
 
 bool wifi_connection_lost;
+bool server_connection_lost;
 bool lora_connection_lost; 
 bool nbiot_connection_lost;
 
@@ -3660,7 +3661,7 @@ static void wifiConfig()
 			}
 			leds[0] = colorLED_empty;
 			FastLED.show();
-			leds[0] = colorLED_wifi; //BLUE
+			leds[0] = colorLED_wifi; //BLUE fixe
 			FastLED.show();
 		}
 		else //si plusieurs LED (ligne ou Matrix)
@@ -3967,7 +3968,7 @@ static void connectWifi()
 
 		if (LEDS_NB == 1)
 		{
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 8; i++)
 			{
 				leds[0] = colorLED_empty;
 				FastLED.show();
@@ -3993,12 +3994,12 @@ static void connectWifi()
 			}
 			else
 			{
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < 8; i++)
 				{
 					fill_solid(leds, LEDS_NB, colorLED_empty);
 					FastLED.show();
 					delay(250);
-					fill_solid(leds, LEDS_NB, colorLED_wifi); //BLUE
+					fill_solid(leds, LEDS_NB, colorLED_wifi); //BLUE blink
 					FastLED.show();
 					delay(250);
 				}
@@ -4287,16 +4288,21 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 				//le serveur répond avec un code 200
 				debug_outln_info(F("Succeeded ! https - "), s_Host);
 				send_success = true;
+				server_connection_lost = false;
+
 			}
 			else if (result >= HTTP_CODE_BAD_REQUEST)
 			{
 				//le serveur répond mais avec une erreur (!200)
 				debug_outln_info(F("Request https failed with error: "), String(result));
 				debug_outln_info(F("Details:"), https.getString());
+				server_connection_lost = true;
+
 			}else {
 				Debug.println("Server did not respond properly (DNS error)");
-				Debug.println("http.POST -> false");
-				//TODO: à partir d'ici passer les LEDs en rouge!
+				Debug.println("https.POST -> false");
+				//pas de connexion avec le serveur
+				server_connection_lost = true;
 			}
 
 			https.end();
@@ -6585,10 +6591,11 @@ void loop()
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;  //send_now becomes TRUE every minutes
 
 	/*
-		LEDS WHITE SWITCH
+		LEDS WHITE BLINK (switch)
 		fait clignoter les LEDS en blanc les 2 premières minutes 
 		(après count_sends devient plus grand que 0)
 	*/
+
 	if (count_sends == 0 && !send_now)  
 	{
 		LEDwait = msSince(starttime_waiter) > (1000 * multiplier);
@@ -6658,6 +6665,154 @@ void loop()
 								leds[i] = colorLED_start;
 							}
 						}
+						FastLED.show();
+					}
+				}
+			}
+			multiplier += 1;
+		}
+	}
+
+/*
+		LEDS RED BLINK (switch)
+		fait clignoter les LEDS en ROUGE lorsqu'il n'y a pas de WIFI
+		(si count_sends est plus grand que 0)
+		(si la connexion wifi est perdue)
+	*/
+
+	if (count_sends > 0 && !send_now && wifi_connection_lost)  
+	{
+		LEDwait = msSince(starttime_waiter) > (1000 * multiplier);
+
+		// Debug.println(starttime_waiter);
+
+		if (LEDwait)
+		{
+
+			if (multiplier & 1) //impair
+			{
+
+				if (LEDS_NB == 1)
+				{
+					leds[0] = colorLED_red;
+					FastLED.show();
+				}
+				else
+				{
+					if (LEDS_MATRIX)
+					{
+						drawpicture(damier1);
+						FastLED.show();
+					}
+					else
+					{
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							if (i & 1)
+							{
+								leds[i] = colorLED_red;
+							}
+							else
+							{
+								leds[i] = colorLED_empty;
+							}
+						}
+						FastLED.show();
+					}
+				}
+			}
+			else //pair
+			{
+
+				if (LEDS_NB == 1)
+				{
+					leds[0] = colorLED_empty;
+					FastLED.show();
+				}
+				else
+				{
+					if (LEDS_MATRIX)
+					{
+						drawpicture(damier2);
+						FastLED.show();
+					}
+					else
+					{
+						for (unsigned int i = 0; i < LEDS_NB; ++i)
+						{
+							if (i & 1)
+							{
+								leds[i] = colorLED_empty;
+							}
+							else
+							{
+								leds[i] = colorLED_red;
+							}
+						}
+						FastLED.show();
+					}
+				}
+			}
+			multiplier += 1;
+		}
+	}
+
+/*
+		LEDS RED (blink)
+		fait clignoter les LEDS en ROUGE lorsqu'il n'y a pas de comm avec le serveur
+		(si count_sends est plus grand que 0)
+		(si la connexion serveur est perdue)
+	*/
+
+	if (count_sends > 0 && !send_now && server_connection_lost)  
+	{
+		LEDwait = msSince(starttime_waiter) > (1000 * multiplier);
+
+		// Debug.println(starttime_waiter);
+
+		if (LEDwait)
+		{
+
+			if (multiplier & 1) //LED EN ROUGE
+			{
+
+				if (LEDS_NB == 1)
+				{
+					leds[0] = colorLED_red;
+					FastLED.show();
+				}
+				else
+				{
+					if (LEDS_MATRIX)
+					{
+						drawpicture(damier1);
+						FastLED.show();
+					}
+					else
+					{
+						fill_solid(leds, LEDS_NB, colorLED_red);
+						FastLED.show();
+					}
+				}
+			}
+			else //LED EN NOIR
+			{
+
+				if (LEDS_NB == 1)
+				{
+					leds[0] = colorLED_empty;
+					FastLED.show();
+				}
+				else
+				{
+					if (LEDS_MATRIX)
+					{
+						drawpicture(damier2);
+						FastLED.show();
+					}
+					else
+					{
+						fill_solid(leds, LEDS_NB, colorLED_empty);
 						FastLED.show();
 					}
 				}
@@ -6879,7 +7034,7 @@ void loop()
 		//et il ne faut pas qu'elle se lance si la connexion WIFI existe mais que le serveur ne répond pas
 		if (cfg::has_led_value && !wifi_connection_lost)  //ne fonctionne pas...
 		{
-			Debug.println("show led color for PM");
+			Debug.println("set led color for PM");
 
 			switch (cfg::value_displayed)
 			{
@@ -7084,6 +7239,7 @@ void loop()
 
 		if (cfg::has_led_value)
 		{
+			//RED blink ! Pas de connexion !
 			if ((cfg::has_wifi && wifi_connection_lost && !cfg::has_lora && !cfg::has_nbiot) || (cfg::has_lora && lora_connection_lost && !cfg::has_wifi && !cfg::has_nbiot) || (cfg::has_nbiot && nbiot_connection_lost && !cfg::has_wifi && !cfg::has_lora))
 			{
 				if (LEDS_NB == 1) //seulement 1 LED
@@ -7134,6 +7290,7 @@ void loop()
 				}
 			}
 
+			//blue blink
 			if (cfg::has_wifi && !wifi_connection_lost)
 			{
 				int32_t signal_diplay_wifi = calcWiFiSignalQuality(last_signal_strength_wifi);
@@ -7267,9 +7424,13 @@ void loop()
 					}
 				}
 			}
-
-			if (cfg::has_led_value)
+			
+			// Affiche les couleurs de LEDs en fonction des polluants mesurés (se fait après la POST Request)
+			
+			if (cfg::has_led_value && !wifi_connection_lost) //wifi connected
 			{
+				Debug.println("show led color for PM");
+
 				if (LEDS_NB == 1)
 				{
 					leds[0] = colorLED_value;
@@ -7289,6 +7450,16 @@ void loop()
 					}
 				}
 			}
+			
+			if(wifi_connection_lost){
+				Debug.println("No WIFI connexion-> RED Leds for 2mins (switch)");
+				
+			}
+			
+			if (server_connection_lost){
+				Debug.println("Server connexion lost-> RED Leds for 2mins (flash)");
+			}
+		
 		}
 
 		starttime = millis(); // store the start time
