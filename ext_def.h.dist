@@ -21,20 +21,18 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define HAS_WIFI 1
 
 //NBIoT
-
 #define HAS_NBIOT 0
 
 // APN -- Access Point Name. Gateway between GPRS MNO
 // and another computer network. E.g. "hologram
 const char APN[] PROGMEM = "hologram";  
-//const unsigned int OPERATEUR = 20801; // ORANGE!!!!!
-const unsigned int OPERATEUR = 26201;
+const unsigned int OPERATEUR = 20801; // ORANGE FR!!!!!
+//const unsigned int OPERATEUR = 26201;
 //const unsigned int OPERATEUR = 26202;
 
 #define NBIOT_FORMAT 1  // 0 = json 1 = byte
 
 //LoRaWAN
-
 #define HAS_LORA 0
 const char APPEUI[] = "000";
 const char DEVEUI [] = "000";

@@ -3955,11 +3955,11 @@ static void connectWifi()
 
 	if (WiFi.waitForConnectResult(10000) != WL_CONNECTED)
 	{
+		Debug.println("Connection wifi lost! Start WifiConfig (AP)");
 		wifi_connection_lost = true;
 		cfg::has_wifi = false;
 		// strcpy_P(cfg::wlanssid, "TYPE SSID");
 		// strcpy_P(cfg::wlanpwd, "TYPE PWD");
-		Debug.println("Connection wifi not activated! Start wifiConfig (AP)");
 		wifiConfig();
 	}
 	else
@@ -4299,7 +4299,7 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 				server_connection_lost = true;
 
 			}else {
-				Debug.println("Server did not respond properly (DNS error)");
+				Debug.println("Server did not respond properly (DNS or SSL error)");
 				Debug.println("https.POST -> false");
 				//pas de connexion avec le serveur
 				server_connection_lost = true;
@@ -4767,9 +4767,15 @@ static void fetchSensorCairsens(String &s)
 				Debug.print("First NO2 measurement with average on:");
 				Debug.println(no2_val_count);
 				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
-				last_value_no2 = float(no2_sum / no2_val_count); // on envoie ppb
+				last_value_no2 = float(no2_sum) / float(no2_val_count); // on envoie ppb
 				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 				debug_outln_info(FPSTR(DBG_TXT_SEP));
+				Debug.print("Debug no2 count:");
+				Debug.println(no2_val_count);
+				Debug.print("Debug no2 sum:");
+				Debug.println(no2_sum);
+				Debug.print("Debug no2 divided:");
+				Debug.println(last_value_no2);
 			}
 			else
 			{
@@ -4781,9 +4787,15 @@ static void fetchSensorCairsens(String &s)
 			if (no2_val_count >= 10)
 			{
 				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
-				last_value_no2 = float(no2_sum / no2_val_count); // on envoie ppb
+				last_value_no2 = float(no2_sum) / float(no2_val_count); // on envoie ppb
 				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 				debug_outln_info(FPSTR(DBG_TXT_SEP));
+				Debug.print("Debug no2 count:");
+				Debug.println(no2_val_count);
+				Debug.print("Debug no2 sum:");
+				Debug.println(no2_sum);
+				Debug.print("Debug no2 divided:");
+				Debug.println(last_value_no2);
 			}
 			else
 			{
@@ -6896,9 +6908,13 @@ void loop()
 	 */
 	if (send_now && cfg::sending_intervall_ms >= 120000)
 	{	
-		Debug.println("********************");
-		Debug.println("send_now -> true !!!");
-		
+		Debug.println("**********************************************");
+		Debug.println("**********************************************");
+		Debug.println("Starting the 2min loop: send_now -> true !!!");
+		Debug.println("wifi_connection_lost: " + String(wifi_connection_lost));
+		Debug.println("cfg::has_wifi: " + String(cfg::has_wifi));
+		Debug.println("");
+
 		void *SpActual = NULL;
 		//Debug.printf("Free Stack at send_now is: %d \r\n", (uint32_t)&SpActual - (uint32_t)StackPtrEnd);
 
@@ -7159,9 +7175,13 @@ void loop()
 			}
 		}
 
-		if ((WiFi.status() != WL_CONNECTED || sending_time > 30000 || wifi_connection_lost) && cfg::has_wifi)
+		//IMPORTANT
+		// Si le WIFI est deconecté OU si le temps d'envoi est plus grand que 30s OU si la connexion wifi est perdue
+		// alors on essaie de se reconnecter
+		if ((WiFi.status() != WL_CONNECTED || sending_time > 30000 || wifi_connection_lost))
 		{
-			debug_outln_info(F("Connection lost, reconnecting "));
+			Debug.println("Attention! Connection WIFI perdue! start WIFI.reconnect. ");
+
 			WiFi_error_count++;
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
