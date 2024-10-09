@@ -3955,12 +3955,13 @@ static void connectWifi()
 
 	if (WiFi.waitForConnectResult(10000) != WL_CONNECTED)
 	{
+		// connection wifi n'a pas aboutit
 		Debug.println("Connection wifi lost! Start WifiConfig (AP)");
 		wifi_connection_lost = true;
-		cfg::has_wifi = false;
+		//cfg::has_wifi = false;					//on laisse has_wifi à true pour ne pas passer en mode AP
 		// strcpy_P(cfg::wlanssid, "TYPE SSID");
 		// strcpy_P(cfg::wlanpwd, "TYPE PWD");
-		wifiConfig();
+		wifiConfig();  //on passe en mode AP
 	}
 	else
 	{
@@ -5329,7 +5330,8 @@ static unsigned long sendDataToOptionalApis(const String &data)
 	Debug.println(data);
 
 	if (cfg::send2madavi)
-	{
+	{	
+		Debug.println("");
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("madavi.de: "));
 		sum_send_time += sendData(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI, cfg::ssl_madavi);
 	}
@@ -5342,6 +5344,7 @@ static unsigned long sendDataToOptionalApis(const String &data)
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
+		Debug.println("");
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircarto api wifi: "));
 		sum_send_time += sendData(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom, cfg::ssl_custom);
 	}
@@ -5354,6 +5357,7 @@ static unsigned long sendDataToOptionalApis(const String &data)
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
+		Debug.println("");
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("atmosud api: "));
 		sum_send_time += sendData(LoggerCustom2, data_4_custom, 0, cfg::host_custom2, cfg::url_custom2, cfg::ssl_custom2);
 	}
