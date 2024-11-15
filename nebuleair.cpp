@@ -60,6 +60,15 @@ String SOFTWARE_VERSION_SHORT(SOFTWARE_VERSION_STR_SHORT);
 #include "./ext_def.h"
 #include "./html-content.h"
 
+// ANSI color codes
+#define COLOR_RED     "\033[31m"
+#define COLOR_GREEN   "\033[32m"
+#define COLOR_YELLOW  "\033[33m"
+#define COLOR_BLUE    "\033[34m"
+#define COLOR_MAGENTA "\033[35m"
+#define COLOR_CYAN    "\033[36m"
+#define COLOR_RESET   "\033[0m"
+
 /*****************************************************************
  * CONFIGURATION                                          *
  *****************************************************************/
@@ -5522,6 +5531,7 @@ void printHex2(unsigned v)
 
 void do_send(osjob_t *j)
 {
+	Debug.println("Lora do_send function start");
 	// Check if there is not a current TX/RX job running
 	if (LMIC.opmode & OP_TXRXPEND)
 	{
@@ -6513,9 +6523,9 @@ void setup()
 
 	if (cfg::has_lora && lorachip)
 	{
-
+		Debug.println("");
+		Debug.println("LORA activated");
 		ToByteArray();
-
 		Debug.printf("APPEUI:\n");
 		for (int i = 0; i < 8; i++)
 		{
@@ -6552,6 +6562,7 @@ void setup()
 		LMIC_reset();
 
 		// Start job (sending automatically starts OTAA too)
+		Debug.println("Start OTAA by starting new job");
 		do_send(&sendjob); // values are -1, -128 etc. they can be easily filtered
 
 		// Prepare the configuration summary for the following messages (the first is 00000000)
@@ -7252,7 +7263,10 @@ void loop()
 		sum_send_time = 0;
 
 		if (cfg::has_lora && lorachip)
-		{
+		{	
+			Debug.println("");	
+			Debug.println("*****");
+			Debug.println("LORA preparing payload");
 			prepareTxFrameLoRa();
 			//do_send(&sendjob); PAS BESOIN??????
 

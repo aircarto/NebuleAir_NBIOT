@@ -234,3 +234,24 @@ if (view1.getUint8(0) < 0 || view1.getUint8(0) > 255 || view1.getUint8(0) % 1 !=
 return {"configuration":("000000000" + view1.getUint8(0).toString(2)).substr(-8),"PM1_SDS":view2.getInt16(1).toString(),"PM2_SDS":view2.getInt16(3).toString(),"PM0_NPM":view1.getInt16(5).toString(),"PM1_NPM":view1.getInt16(7).toString(),"PM2_NPM":view1.getInt16(9).toString(),"N1_NPM":view1.getInt16(11).toString(),"N10_NPM":view1.getInt16(13).toString(),"N25_NPM":view1.getInt16(15).toString(),"VOC_CCS811":view2.getInt16(17).toString(),"T_BME":view2.getInt8(19).toString(),"H_BME":view2.getInt8(21).toString(),"P_BME":view2.getInt16(22).toString(),"NO2":view2.getInt16(24).toString();  
 }
 ```
+
+### uplink payload formatter for ttn
+```
+function decodeUplink(input) {
+    // Convert the payload to bytes
+    let bytes = input.bytes;
+    
+    // Parse the values in pairs of two bytes (each value is represented by two bytes)
+    let values = [
+        { "value_type": "PM1", "value": (bytes[5] * 256 + bytes[6]) / 10 },
+       { "value_type": "PM2.5", "value": (bytes[9] * 256 + bytes[10]) / 10 },
+        { "value_type": "PM10", "value": (bytes[7] * 256 + bytes[8]) / 10 }
+    ];
+    
+    return {
+        data: {
+            measurements: values
+        }
+    };
+}
+```
