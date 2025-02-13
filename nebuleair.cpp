@@ -4778,7 +4778,7 @@ static void fetchSensorCairsens(String &s)
 				Debug.println(no2_val_count);
 				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
 				last_value_no2 = float(no2_sum) / float(no2_val_count); // on envoie ppb
-				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+				add_Value2Json(s, F("CAIRSENS_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 				debug_outln_info(FPSTR(DBG_TXT_SEP));
 				Debug.print("Debug no2 count:");
 				Debug.println(no2_val_count);
@@ -4798,7 +4798,7 @@ static void fetchSensorCairsens(String &s)
 			{
 				// last_value_no2 = CairsensUART::ppbToPpm(CairsensUART::NO2, float(no2_sum / no2_val_count));
 				last_value_no2 = float(no2_sum) / float(no2_val_count); // on envoie ppb
-				add_Value2Json(s, F("Cairsens_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
+				add_Value2Json(s, F("CAIRSENS_NO2"), FPSTR(DBG_TXT_NO2PPB), last_value_no2);
 				debug_outln_info(FPSTR(DBG_TXT_SEP));
 				Debug.print("Debug no2 count:");
 				Debug.println(no2_val_count);
