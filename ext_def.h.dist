@@ -85,6 +85,8 @@ static const char URL_CUSTOM[] PROGMEM = "/wifi.php";
 #define SSL_CUSTOM 1        //0 ou 1 pour activer le HTTPS
 
 // WIFI API 2 (AtmoSud MicroSpot)
+// en production:   api-prod.uspot.probesys.net
+// en dev:          api-staging.uspot.probesys.net
 static const char HOST_CUSTOM2[] PROGMEM = "192.168.234.1";
 static const char URL_CUSTOM2[] PROGMEM = "/data.php";
 #define PORT_CUSTOM2 80     // 80 for HTTP and 443 for HTTPS
